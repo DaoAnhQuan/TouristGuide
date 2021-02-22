@@ -1,5 +1,7 @@
 package com.android.touristguide;
 
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,10 +14,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.bumptech.glide.Glide;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -42,6 +46,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private FirebaseUser currentUser;
     private View navigationHeaderView;
     private final String TAG = "MapActivityTAG";
+    private ShimmerFrameLayout svNavHeader;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,6 +63,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         imvAvatar = (ImageView) navigationHeaderView.findViewById(R.id.imv_avatar);
         tvUsername = (TextView) navigationHeaderView.findViewById(R.id.tv_username);
         tvEmail = (TextView) navigationHeaderView.findViewById(R.id.tv_email);
+        svNavHeader = (ShimmerFrameLayout) navigationHeaderView.findViewById(R.id.sv_nav_header);
         mAuth = FirebaseAuth.getInstance();
 
         currentUser = mAuth.getCurrentUser();
@@ -67,6 +73,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         NavigationItemSelectedListener navigationItemSelectedListener = new NavigationItemSelectedListener(this);
         navigationView.setNavigationItemSelectedListener(navigationItemSelectedListener);
 
+        svNavHeader.startShimmer();
         addHeaderValueEventListener();
     }
 
@@ -75,10 +82,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 User user = snapshot.getValue(User.class);
-                tvEmail.setText(user.email);
-                tvUsername.setText(user.username);
+                svNavHeader.hideShimmer();
+                Helper.setTextViewUI(tvEmail,user.email,"#FFFFFF","#555555",false);
+                Helper.setTextViewUI(tvUsername,user.username,"#FFFFFF","#000000",true);
                 if (user.avatar != null){
                     Glide.with(navigationHeaderView).load(user.avatar).into(imvAvatar);
+                }else{
+                    Glide.with(navigationHeaderView).load(ContextCompat.getDrawable(MapActivity.this,R.drawable.ic_baseline_person_white_24)).into(imvAvatar);
                 }
             }
 

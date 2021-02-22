@@ -5,7 +5,7 @@
         android:checkableBehavior="single">
         <item
             android:id="@+id/mn_account"
-            android:icon="@drawable/ic_baseline_person_24"
+            android:icon="@drawable/ic_baseline_person_gray_24"
             android:title="@string/account"/>
         <item
             android:id="@+id/mn_logout"

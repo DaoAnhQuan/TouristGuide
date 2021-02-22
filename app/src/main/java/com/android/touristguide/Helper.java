@@ -3,6 +3,7 @@ package com.android.touristguide;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.CountDownTimer;
 import android.text.Html;
@@ -108,5 +109,15 @@ public class Helper {
     public static void finishActivityFromContext(Context context){
         AppCompatActivity activity = (AppCompatActivity) context;
         activity.finish();
+    }
+
+    public static void setTextViewUI(TextView tv, String text, String backgroundColor, String textColor, boolean isBold){
+        if (isBold){
+            tv.setText(getBoldString(text));
+        }else{
+            tv.setText(text);
+        }
+        tv.setTextColor(Color.parseColor(textColor));
+        tv.setBackgroundColor(Color.parseColor(backgroundColor));
     }
 }

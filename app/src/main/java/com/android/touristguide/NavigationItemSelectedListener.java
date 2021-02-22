@@ -25,9 +25,11 @@ public class NavigationItemSelectedListener implements NavigationView.OnNavigati
                 Intent toLoginActivity = new Intent(currentContext, LoginActivity.class);
                 currentContext.startActivity(toLoginActivity);
                 Helper.finishActivityFromContext(currentContext);
+                break;
             case R.id.mn_account:
                 Intent toAccountActivity = new Intent(currentContext, AccountActivity.class);
                 currentContext.startActivity(toAccountActivity);
+                break;
         }
         return false;
     }
