@@ -41,4 +41,11 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
+    <string name="edit">Edit</string>
+    <string name="group">Group</string>
+    <string name="new_group">New group</string>
+    <string name="no_group">You have not joined a group yet.</string>
+    <string name="name_group">Name the group</string>
+    <string name="selected">Selected:</string>
+    <string name="search_user">Type email or username</string>
 </resources>

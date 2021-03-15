@@ -12,12 +12,17 @@ import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class Helper {
@@ -119,5 +124,24 @@ public class Helper {
         }
         tv.setTextColor(Color.parseColor(textColor));
         tv.setBackgroundColor(Color.parseColor(backgroundColor));
+    }
+
+    public static void loadAvatar(String url, ImageView imv, View parent, Context context,int drawableId ){
+        if (url != null){
+            Glide.with(parent).load(url).into(imv);
+        }else{
+            Glide.with(parent).load(ContextCompat.getDrawable(context,drawableId)).into(imv);
+        }
+    }
+
+    public static List<User> createListUsersForTest(){
+        List<User> users = new ArrayList<User>();
+        users.add(new User("Dao Quan","daoan@gmail.com","0123456789","https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"));
+        users.add(new User("Dao Giang","daoawfwefn@gmail.com","0123456789","https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"));
+        users.add(new User("Dao Narotu","dawewfwoan@gmail.com","0123456789","https://www.w3schools.com/w3css/img_lights.jpg"));
+        users.add(new User("Dao Quan","daoan@gmail.com","0123456789","https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"));
+        users.add(new User("Dao Giang","daoawfwefn@gmail.com","0123456789","https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"));
+        users.add(new User("Dao Narotu","dawewfwoan@gmail.com","0123456789","https://www.w3schools.com/w3css/img_lights.jpg"));
+        return users;
     }
 }

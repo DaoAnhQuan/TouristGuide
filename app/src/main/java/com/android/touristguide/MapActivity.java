@@ -70,7 +70,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         svLocation.attachNavigationDrawerToMenuButton(drawerLayout);
         
-        NavigationItemSelectedListener navigationItemSelectedListener = new NavigationItemSelectedListener(this);
+        NavigationItemSelectedListener navigationItemSelectedListener = new NavigationItemSelectedListener(this,drawerLayout);
         navigationView.setNavigationItemSelectedListener(navigationItemSelectedListener);
 
         svNavHeader.startShimmer();
@@ -85,11 +85,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 svNavHeader.hideShimmer();
                 Helper.setTextViewUI(tvEmail,user.email,"#FFFFFF","#555555",false);
                 Helper.setTextViewUI(tvUsername,user.username,"#FFFFFF","#000000",true);
-                if (user.avatar != null){
-                    Glide.with(navigationHeaderView).load(user.avatar).into(imvAvatar);
-                }else{
-                    Glide.with(navigationHeaderView).load(ContextCompat.getDrawable(MapActivity.this,R.drawable.ic_baseline_person_white_24)).into(imvAvatar);
-                }
+                Helper.loadAvatar(user.avatar, imvAvatar, navigationHeaderView, MapActivity.this,R.drawable.ic_baseline_person_white_24);
             }
 
             @Override
