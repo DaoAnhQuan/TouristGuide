@@ -29,7 +29,10 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.SignInMethodQueryResult;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.HttpsCallableResult;
 import com.shobhitpuri.custombuttons.GoogleSignInButton;
 
 public class LoginActivity extends AppCompatActivity {
@@ -47,6 +50,7 @@ public class LoginActivity extends AppCompatActivity {
     private final int RC_SIGN_IN = 9001;
     private final String TAG = "LoginActivity";
     private AlertDialog loadingDialog;
+    private FirebaseFunctions firebaseFunctions;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +66,7 @@ public class LoginActivity extends AppCompatActivity {
         tilPassword = (TextInputLayout) findViewById(R.id.til_password_login);
         loadingDialog = Helper.createLoadingDialog(this);
         mAuth = FirebaseAuth.getInstance();
+        firebaseFunctions = Helper.initFirebaseFunctions();
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_client_id))
                 .requestEmail()
@@ -164,32 +169,36 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void firebaseAuthWithGoogle(final GoogleSignInAccount account) {
-        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+        final AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+//        mAuth.fetchSignInMethodsForEmail(account.getEmail())
+//                .addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<SignInMethodQueryResult> task) {
+//                        boolean isExistingEmail = false;
+//                        if (task)
+//                    }
+//                });
         mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            FirebaseUser currentUser = mAuth.getCurrentUser();
-                            User user = new User(account.getDisplayName(),account.getEmail(),null,account.getPhotoUrl().toString());
-                            FirebaseDatabase.getInstance().getReference("Users")
-                                    .child(currentUser.getUid())
-                                    .setValue(user)
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            loadingDialog.cancel();
-                                            if (task.isSuccessful()){
-                                                Intent intent = new Intent(LoginActivity.this,MapActivity.class);
-                                                startActivity(intent);
-                                                finish();
-                                            }else{
-                                                Log.d(TAG,"profile failed");
-                                                Toast.makeText(LoginActivity.this, R.string.google_sign_in_failed, Toast.LENGTH_LONG).show();
-                                            }
-                                        }
-                                    });
+                            String photo = account.getPhotoUrl().toString().replace("s96-c","s720-c");
+                            Helper.signUp(account.getDisplayName(), account.getEmail(),photo,firebaseFunctions)
+                                   .addOnCompleteListener(new OnCompleteListener<HttpsCallableResult>() {
+                                       @Override
+                                       public void onComplete(@NonNull Task<HttpsCallableResult> task) {
+                                           loadingDialog.cancel();
+                                           if (task.isSuccessful()){
+                                               Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+                                               startActivity(intent);
+                                               finish();
+                                           }else{
+                                               Log.d(TAG,"profile failed");
+                                               Toast.makeText(LoginActivity.this, R.string.google_sign_in_failed, Toast.LENGTH_LONG).show();
+                                           }
+                                       }
+                                   });
                         } else {
                             // If sign in fails, display a message to the user.
                             loadingDialog.cancel();
@@ -230,7 +239,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()){
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user.isEmailVerified()){
-                            Intent intent = new Intent(LoginActivity.this,MapActivity.class);
+                            Intent intent = new Intent(LoginActivity.this,MainActivity.class);
                             startActivity(intent);
                             finish();
                         }else{

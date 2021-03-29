@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
-        <activity android:name=".NewGroupActivity"></activity>
+        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".NewGroupActivity" />
         <activity android:name=".GroupActivity" />
         <activity android:name=".WelcomeActivity">
             <intent-filter>
@@ -23,9 +24,17 @@
         </activity>
         <activity android:name=".LoginActivity" />
         <activity android:name=".SignUpActivity" />
-        <activity android:name=".MapActivity" />
-        <activity android:name=".AccountActivity" />
         <activity android:name=".ForgotPasswordActivity" />
+        <activity android:name=".ShowImageActivity"/>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.android.touristguide.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
+        </provider>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

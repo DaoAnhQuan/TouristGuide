@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_change_username"
+        android:title="@string/change_username"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_change_avatar"
+        android:title="@string/change_avatar"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_change_phone_number"
+        android:title="@string/change_phone"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_change_password"
+        android:title="@string/change_password"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_log_out"
+        android:title="@string/log_out"
+        app:showAsAction="never"/>
+</menu>

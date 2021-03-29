@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.CountDownTimer;
 import android.text.Html;
 import android.text.SpannableString;
@@ -19,10 +20,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.HttpsCallableResult;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class Helper {
@@ -134,14 +142,42 @@ public class Helper {
         }
     }
 
+    public static Task<HttpsCallableResult> signUp(String username,String email, String avatar, FirebaseFunctions mFuntions){
+        Map<String, String> data = new HashMap<>();
+        data.put("username",username);
+        data.put("email",email);
+        if (avatar != null){
+            data.put("avatar",avatar);
+        }
+        return mFuntions
+                .getHttpsCallable("signUp")
+                .call(data);
+    }
+
+    public static FirebaseFunctions initFirebaseFunctions(){
+        FirebaseFunctions functions = FirebaseFunctions.getInstance();
+        functions.useEmulator("192.168.1.2",5001);
+        return functions;
+    }
+
+    public static String createFirebaseStorageFilename(Uri uri){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        String timestamp = String.valueOf((new Date()).getTime());
+//        String filename = uri.getLastPathSegment();
+//        String extension = filename.substring(filename.lastIndexOf("."));
+        String fbFilename = uid+"_"+timestamp;
+        return fbFilename;
+    }
+
     public static List<User> createListUsersForTest(){
         List<User> users = new ArrayList<User>();
-        users.add(new User("Dao Quan","daoan@gmail.com","0123456789","https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"));
-        users.add(new User("Dao Giang","daoawfwefn@gmail.com","0123456789","https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"));
-        users.add(new User("Dao Narotu","dawewfwoan@gmail.com","0123456789","https://www.w3schools.com/w3css/img_lights.jpg"));
-        users.add(new User("Dao Quan","daoan@gmail.com","0123456789","https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"));
-        users.add(new User("Dao Giang","daoawfwefn@gmail.com","0123456789","https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"));
-        users.add(new User("Dao Narotu","dawewfwoan@gmail.com","0123456789","https://www.w3schools.com/w3css/img_lights.jpg"));
+        users.add(new User("1","Dao Quan","daoan@gmail.com","0123456789","https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"));
+        users.add(new User("2","Dao Giang","daoawfwefn@gmail.com","0123456789","https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"));
+        users.add(new User("3","Dao Narotu","dawewfwoan@gmail.com","0123456789","https://www.w3schools.com/w3css/img_lights.jpg"));
+        users.add(new User("4","Dao Quan","daoan@gmail.com","0123456789","https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"));
+        users.add(new User("5","Dao Giang","daoawfwefn@gmail.com","0123456789","https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"));
+        users.add(new User("6", "Dao Narotu","dawewfwoan@gmail.com","0123456789","https://www.w3schools.com/w3css/img_lights.jpg"));
         return users;
     }
 }

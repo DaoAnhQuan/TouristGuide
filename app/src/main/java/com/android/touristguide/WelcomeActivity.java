@@ -24,7 +24,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null && user.isEmailVerified()){
-            Intent toMainActivity = new Intent(this, MapActivity.class);
+            Intent toMainActivity = new Intent(this, MainActivity.class);
             startActivity(toMainActivity);
         }
         else{

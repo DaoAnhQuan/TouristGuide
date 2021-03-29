@@ -48,4 +48,13 @@
     <string name="name_group">Name the group</string>
     <string name="selected">Selected:</string>
     <string name="search_user">Type email or username</string>
+    <string name="post">Post</string>
+    <string name="notification">Notification</string>
+    <string name="more">More</string>
+    <string name="change_username">Change username</string>
+    <string name="change_avatar">Change avatar</string>
+    <string name="change_phone">Change phone number</string>
+    <string name="change_password">Change password</string>
+    <string name="tel">Tel:</string>
+    <string name="upload_failed">Upload image failed. Please try again!</string>
 </resources>

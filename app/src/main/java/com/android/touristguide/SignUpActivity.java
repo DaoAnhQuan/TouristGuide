@@ -23,6 +23,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.SignInMethodQueryResult;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.HttpsCallableResult;
 
 public class SignUpActivity extends AppCompatActivity {
     private EditText edEmail;
@@ -35,6 +37,7 @@ public class SignUpActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private EditText edUsername;
     private TextInputLayout tilUsername;
+    private FirebaseFunctions mFunctions;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,6 +54,7 @@ public class SignUpActivity extends AppCompatActivity {
         tilUsername = (TextInputLayout) findViewById(R.id.til_username);
         edUsername = (EditText) findViewById(R.id.ed_username);
         mAuth = FirebaseAuth.getInstance();
+        mFunctions = Helper.initFirebaseFunctions();
 
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -175,24 +179,20 @@ public class SignUpActivity extends AppCompatActivity {
                                             @Override
                                             public void onComplete(@NonNull Task<AuthResult> task) {
                                                 if (task.isSuccessful()){
-                                                    final FirebaseUser currentUser = mAuth.getCurrentUser();
-                                                    User user = new User(username,email,null,null);
-                                                    FirebaseDatabase.getInstance().getReference("Users")
-                                                            .child(currentUser.getUid())
-                                                            .setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            loadingDialog.cancel();
-                                                            if (task.isSuccessful()){
-                                                                currentUser.sendEmailVerification();
-                                                                Helper.showEmailVerificationDialog(SignUpActivity.this, email, currentUser, Helper.SIGN_UP_MODE);
-                                                            }else{
-                                                                Log.d("SignupACtivity",task.getException().toString());
-                                                                Toast.makeText(SignUpActivity.this,task.getException().toString(), Toast.LENGTH_LONG).show();
-                                                            }
-                                                        }
-                                                    });
-
+                                                    mAuth.getCurrentUser().sendEmailVerification();
+                                                    Helper.signUp(username,email,"",mFunctions)
+                                                            .addOnCompleteListener(new OnCompleteListener<HttpsCallableResult>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<HttpsCallableResult> task) {
+                                                                    loadingDialog.cancel();
+                                                                    if (task.isSuccessful()){
+                                                                        Helper.showEmailVerificationDialog(SignUpActivity.this, email, mAuth.getCurrentUser(), Helper.SIGN_UP_MODE);
+                                                                    }else{
+                                                                        Log.d("SignUpActivity",task.getException().toString());
+                                                                        Toast.makeText(SignUpActivity.this,task.getException().toString(), Toast.LENGTH_LONG).show();
+                                                                    }
+                                                                }
+                                                            });
                                                 }else{
                                                     loadingDialog.cancel();
                                                     Toast.makeText(SignUpActivity.this,getString(R.string.sign_up_failed),Toast.LENGTH_LONG).show();
