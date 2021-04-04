@@ -28,8 +28,13 @@ import com.asksira.bsimagepicker.Utils;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -65,7 +70,6 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
     private String mUsername = null;
     private String mTel = null;
     private Boolean avatarDownload = null;
-
     public AccountFragment(){
 
     }
@@ -121,6 +125,9 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
                     case R.id.menu_change_phone_number:
                         changeTelephoneNumber();
                         return true;
+                    case R.id.menu_change_password:
+                        changePassword();
+                        return true;
                 }
                 return false;
             }
@@ -143,6 +150,149 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
         avatarRef.addValueEventListener(avatarListener);
         phoneRef.addValueEventListener(phoneListener);
         return view;
+    }
+
+    private void changePassword(){
+        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+        View view = layoutInflater.inflate(R.layout.change_password_layout1,null);
+        final AlertDialog changePasswordDialog = new AlertDialog.Builder(getContext()).create();
+        Button btnCancel = (Button) view.findViewById(R.id.btn_cancel);
+        final EditText edPassword = (EditText) view.findViewById(R.id.ed_password);
+        final Button btnOK = (Button) view.findViewById(R.id.btn_OK);
+        final TextInputLayout tilPassword = (TextInputLayout) view.findViewById(R.id.til_password);
+        btnOK.setEnabled(false);
+        edPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String text = editable.toString();
+                tilPassword.setError("");
+                if (text.length()>5){
+                    btnOK.setEnabled(true);
+                }else{
+                    btnOK.setEnabled(false);
+                }
+            }
+        });
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changePasswordDialog.cancel();
+            }
+        });
+        btnOK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final String password = edPassword.getText().toString();
+                FirebaseUser user = mAuth.getCurrentUser();
+                AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(),password);
+                user.reauthenticate(credential)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                changePasswordDialog.cancel();
+                                updatePassword(password);
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                tilPassword.setError(getString(R.string.incorrect_password));
+                            }
+                });
+            }
+        });
+        changePasswordDialog.setView(view);
+        changePasswordDialog.show();
+    }
+
+    private void updatePassword(final String oldPassword){
+        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+        View view = layoutInflater.inflate(R.layout.change_password_layout2,null);
+        final AlertDialog changePasswordDialog = new AlertDialog.Builder(getContext()).create();
+        Button btnCancel = (Button) view.findViewById(R.id.btn_cancel);
+        final EditText edPassword = (EditText) view.findViewById(R.id.ed_password);
+        final EditText edConfirmPassword = (EditText) view.findViewById(R.id.ed_confirm_password);
+        final TextInputLayout tilConfirmPassword = (TextInputLayout) view.findViewById(R.id.til_confirm_password);
+        final Button btnSave = (Button) view.findViewById(R.id.btn_save);
+        final TextInputLayout tilPassword = (TextInputLayout) view.findViewById(R.id.til_password);
+        btnSave.setEnabled(false);
+        edPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String text = editable.toString();
+                tilPassword.setError("");
+                tilConfirmPassword.setError("");
+                if (text.length()>5){
+                    btnSave.setEnabled(true);
+                }else{
+                    btnSave.setEnabled(false);
+                }
+            }
+        });
+        edConfirmPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                tilConfirmPassword.setError("");
+            }
+        });
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changePasswordDialog.cancel();
+            }
+        });
+
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String password = edPassword.getText().toString();
+                String confirmPassword = edConfirmPassword.getText().toString();
+                if(password.equals(oldPassword)){
+                    tilPassword.setError(getString(R.string.same_password));
+                }else{
+                    if (password.equals(confirmPassword)){
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        user.updatePassword(password);
+                        changePasswordDialog.cancel();
+                    }else{
+                        tilConfirmPassword.setError(getString(R.string.confirmation_not_match));
+                    }
+                }
+            }
+        });
+
+        changePasswordDialog.setView(view);
+        changePasswordDialog.show();
     }
 
     ValueEventListener usernameListener = new ValueEventListener() {

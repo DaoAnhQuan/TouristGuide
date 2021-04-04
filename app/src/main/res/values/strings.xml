@@ -61,4 +61,7 @@
     <string name="telephone_number">Telephone number</string>
     <string name="download">Download</string>
     <string name="download_succeed">is downloaded!</string>
+    <string name="incorrect_password">Password is incorrect!</string>
+    <string name="new_password">New password</string>
+    <string name="same_password">The new password is the same as the old one!</string>
 </resources>
