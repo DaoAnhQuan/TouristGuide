@@ -156,7 +156,7 @@ public class Helper {
 
     public static FirebaseFunctions initFirebaseFunctions(){
         FirebaseFunctions functions = FirebaseFunctions.getInstance();
-        functions.useEmulator("192.168.1.2",5001);
+        functions.useEmulator("192.168.1.3",5001);
         return functions;
     }
 

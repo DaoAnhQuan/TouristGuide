@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#FFFFFF"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="?dialogPreferredPadding"
+    android:paddingRight="?dialogPreferredPadding">
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="@string/telephone_number"
+        app:hintEnabled="true"
+        app:hintTextColor="#000000"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:hintTextAppearance="@style/TextLabel"
+        android:id="@+id/til_username"
+        app:errorEnabled="true"
+        app:errorTextAppearance="@style/Error"
+        >
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/LoginEditext"
+            android:maxLines="1"
+            android:inputType="number"
+            android:id="@+id/ed_tel"
+            />
+
+    </com.google.android.material.textfield.TextInputLayout>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/til_username"
+        app:layout_constraintRight_toRightOf="parent"
+        android:id="@+id/btn_save"
+        android:textSize="18sp"
+        android:textColor="@color/text_button_color"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:text="@string/save"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/til_username"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:id="@+id/btn_cancel"
+        android:textSize="18sp"
+        android:textColor="#D85A06"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:text="@string/cancel"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

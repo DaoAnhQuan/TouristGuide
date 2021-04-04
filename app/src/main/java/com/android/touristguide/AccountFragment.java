@@ -6,15 +6,19 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import android.content.Context;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,11 +28,8 @@ import com.asksira.bsimagepicker.Utils;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -60,8 +61,10 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
     private String avatar = null;
     private FirebaseStorage storage;
     private FirebaseFunctions mFunctions;
-    private String avatarUpdateTime;
-    private boolean avatarDownload;
+    private String avatarUpdateTime = null;
+    private String mUsername = null;
+    private String mTel = null;
+    private Boolean avatarDownload = null;
 
     public AccountFragment(){
 
@@ -113,8 +116,11 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
                         singleSelectionPicker.show(getChildFragmentManager(),"picker");
                         return true;
                     case R.id.menu_change_username:
-
+                        changeUsername();
                         return  true;
+                    case R.id.menu_change_phone_number:
+                        changeTelephoneNumber();
+                        return true;
                 }
                 return false;
             }
@@ -123,9 +129,12 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
         imvAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (avatar != null){
+                if (avatar != null && mUsername != null && avatarUpdateTime != null && avatarDownload != null){
                     Intent intent = new Intent(getContext(),ShowImageActivity.class);
                     intent.putExtra("image_url",avatar);
+                    intent.putExtra("username",mUsername);
+                    intent.putExtra("update_time",avatarUpdateTime);
+                    intent.putExtra("download",avatarDownload.booleanValue());
                     startActivity(intent);
                 }
             }
@@ -141,6 +150,7 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
         public void onDataChange(@NonNull DataSnapshot snapshot) {
             String username = snapshot.getValue().toString();
             toolbar.setTitle(username);
+            mUsername = username;
             Helper.setTextViewUI(tvUsername,username,"#FFFFFF","#000000",true);
         }
 
@@ -175,6 +185,7 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
         public void onDataChange(@NonNull DataSnapshot snapshot) {
             try {
                 String phone = snapshot.getValue().toString();
+                mTel = phone;
                 String text = getString(R.string.tel)+" "+phone;
                 Helper.setTextViewUI(tvPhone,text,"#FFFFFF","#000000",true);
             }catch (NullPointerException e){
@@ -191,25 +202,25 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
     @Override
     public void onSingleImageSelected(Uri uri, String tag) {
         Log.d("ImagePicker",uri.toString());
-        String fbFilename = Helper.createFirebaseStorageFilename(uri);
+        final String fbFilename = Helper.createFirebaseStorageFilename(uri);
         final StorageReference ref = storage.getReference().child(fbFilename);
-        Glide.with(parent).load(uri).into(imvAvatar);
         UploadTask uploadTask = ref.putFile(uri);
         uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
             public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                if (!task.isSuccessful()){
+                if (!task.isSuccessful()) {
                     throw task.getException();
                 }
+
+                // Continue with the task to get the download URL
                 return ref.getDownloadUrl();
             }
         }).addOnCompleteListener(new OnCompleteListener<Uri>() {
             @Override
             public void onComplete(@NonNull Task<Uri> task) {
                 if (task.isSuccessful()){
-                    Uri downloadUri = task.getResult();
                     Map<String,String> data = new HashMap<>();
-                    data.put("url",downloadUri.toString());
+                    data.put("url",task.getResult().toString());
                     mFunctions.getHttpsCallable("updateAvatar").call(data);
                 }else{
                     Toast.makeText(getContext(),getString(R.string.upload_failed),Toast.LENGTH_LONG).show();
@@ -226,5 +237,108 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
     @Override
     public void onCancelled(boolean isMultiSelecting, String tag) {
 
+    }
+
+    public void changeUsername(){
+        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+        View view = layoutInflater.inflate(R.layout.change_username_layout,null);
+        final AlertDialog changeUsernameDialog = new AlertDialog.Builder(getContext()).create();
+        Button btnCancel = (Button) view.findViewById(R.id.btn_cancel);
+        final EditText edUsername = (EditText) view.findViewById(R.id.ed_username);
+        final Button btnSave = (Button) view.findViewById(R.id.btn_save);
+        btnSave.setEnabled(false);
+        edUsername.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String text = editable.toString();
+                if (text.length()>0 && !text.equals(mUsername)){
+                    btnSave.setEnabled(true);
+                }else{
+                    btnSave.setEnabled(false);
+                }
+            }
+        });
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeUsernameDialog.cancel();
+            }
+        });
+        if (mUsername != null){
+            edUsername.setText(mUsername);
+            edUsername.selectAll();
+        }
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Map<String,String> data = new HashMap<>();
+                data.put("username",edUsername.getText().toString().trim());
+                mFunctions.getHttpsCallable("updateUsername").call(data);
+                changeUsernameDialog.cancel();
+            }
+        });
+        changeUsernameDialog.setView(view);
+        changeUsernameDialog.show();
+    }
+    public void changeTelephoneNumber(){
+        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+        View view = layoutInflater.inflate(R.layout.change_tel_layout,null);
+        final AlertDialog changeTelephoneNumberDialog = new AlertDialog.Builder(getContext()).create();
+        Button btnCancel = (Button) view.findViewById(R.id.btn_cancel);
+        final EditText edTel = (EditText) view.findViewById(R.id.ed_tel);
+        final Button btnSave = (Button) view.findViewById(R.id.btn_save);
+        btnSave.setEnabled(false);
+        edTel.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String text = editable.toString();
+                if (text.length()>0 && !text.equals(mTel)){
+                    btnSave.setEnabled(true);
+                }else{
+                    btnSave.setEnabled(false);
+                }
+            }
+        });
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeTelephoneNumberDialog.cancel();
+            }
+        });
+        if (mTel != null){
+            edTel.setText(mTel);
+            edTel.selectAll();
+        }
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Map<String,String> data = new HashMap<>();
+                data.put("tel",edTel.getText().toString().trim());
+                mFunctions.getHttpsCallable("updateTelephoneNumber").call(data);
+                changeTelephoneNumberDialog.cancel();
+            }
+        });
+        changeTelephoneNumberDialog.setView(view);
+        changeTelephoneNumberDialog.show();
     }
 }
