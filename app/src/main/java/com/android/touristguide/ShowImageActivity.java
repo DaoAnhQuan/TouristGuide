@@ -6,6 +6,7 @@ import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,11 +28,16 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
@@ -78,9 +84,25 @@ public class ShowImageActivity extends AppCompatActivity {
         download = imageBundle.getBoolean("download");
         String creator = imageBundle.getString("username");
         String updateTime = imageBundle.getString("update_time");
+        final CircularProgressIndicator progressIndicator = findViewById(R.id.prg_image);
 
         storageRef = storage.getReferenceFromUrl(imagePath);
-        Glide.with(this).load(Uri.parse(imagePath)).into(zm);
+        Glide.with(this)
+                .load(Uri.parse(imagePath))
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        progressIndicator.setVisibility(View.GONE);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        progressIndicator.setVisibility(View.GONE);
+                        return false;
+                    }
+                })
+                .into(zm);
         tvCreator.setText(creator);
         tvUpdateTime.setText(updateTime);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {

@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -26,12 +27,17 @@ import android.widget.Toast;
 import com.asksira.bsimagepicker.BSImagePicker;
 import com.asksira.bsimagepicker.Utils;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
@@ -70,6 +76,7 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
     private String mUsername = null;
     private String mTel = null;
     private Boolean avatarDownload = null;
+    private CircularProgressIndicator progressIndicator;
     public AccountFragment(){
 
     }
@@ -96,6 +103,7 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
         tvUsername = (TextView) view.findViewById(R.id.tv_username);
         tvPhone = (TextView) view.findViewById(R.id.tv_tel);
         tvEmail = (TextView) view.findViewById(R.id.tv_email);
+        progressIndicator = (CircularProgressIndicator) view.findViewById(R.id.prg_avatar);
         parent = view;
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -318,7 +326,20 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
                 avatarUpdateTime = snapshot.child("time").getValue().toString();
                 avatarDownload = snapshot.child("download").getValue(Boolean.class);
                 Uri avatarUri = Uri.parse(avatar);
-                Glide.with(parent).load(avatarUri).into(imvAvatar);
+                Glide.with(parent).load(avatarUri).listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        progressIndicator.setVisibility(View.GONE);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        progressIndicator.setVisibility(View.GONE);
+                        return false;
+                    }
+                })
+                        .into(imvAvatar);
             }catch (NullPointerException e){
                 Glide.with(parent).load(ContextCompat.getDrawable(getContext(),R.drawable.ic_baseline_person_white_24)).into(imvAvatar);
             }
