@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,7 +38,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
@@ -56,6 +56,7 @@ import com.google.firebase.storage.UploadTask;
 import java.util.HashMap;
 import java.util.Map;
 
+import aglibs.loading.skeleton.layout.SkeletonConstraintLayout;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class AccountFragment extends Fragment implements BSImagePicker.OnSingleImageSelectedListener,
@@ -69,6 +70,7 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
     private TextView tvUsername;
     private TextView tvPhone;
     private TextView tvEmail;
+    private SkeletonConstraintLayout shimmer;
     private String avatar = null;
     private FirebaseStorage storage;
     private FirebaseFunctions mFunctions;
@@ -76,7 +78,6 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
     private String mUsername = null;
     private String mTel = null;
     private Boolean avatarDownload = null;
-    private CircularProgressIndicator progressIndicator;
     public AccountFragment(){
 
     }
@@ -98,12 +99,13 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.activity_account, container, false);
+        shimmer = (SkeletonConstraintLayout) view.findViewById(R.id.shimmer);
         toolbar = (MaterialToolbar) view.findViewById(R.id.top_app_bar_account);
         imvAvatar = (CircleImageView) view.findViewById(R.id.imv_avatar);
         tvUsername = (TextView) view.findViewById(R.id.tv_username);
         tvPhone = (TextView) view.findViewById(R.id.tv_tel);
         tvEmail = (TextView) view.findViewById(R.id.tv_email);
-        progressIndicator = (CircularProgressIndicator) view.findViewById(R.id.prg_avatar);
+
         parent = view;
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -303,11 +305,11 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
         changePasswordDialog.show();
     }
 
+
     ValueEventListener usernameListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
             String username = snapshot.getValue().toString();
-            toolbar.setTitle(username);
             mUsername = username;
             Helper.setTextViewUI(tvUsername,username,"#FFFFFF","#000000",true);
         }
@@ -329,19 +331,35 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
                 Glide.with(parent).load(avatarUri).listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        progressIndicator.setVisibility(View.GONE);
+                        shimmer.stopLoading();
                         return false;
                     }
 
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                        progressIndicator.setVisibility(View.GONE);
+                        shimmer.stopLoading();
                         return false;
                     }
                 })
                         .into(imvAvatar);
             }catch (NullPointerException e){
-                Glide.with(parent).load(ContextCompat.getDrawable(getContext(),R.drawable.ic_baseline_person_white_24)).into(imvAvatar);
+                imvAvatar.setCircleBackgroundColor(Color.parseColor("#aaaaaa"));
+                Glide.with(parent)
+                        .load(ContextCompat.getDrawable(getContext(),R.drawable.ic_baseline_person_white_24))
+                        .listener(new RequestListener<Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                shimmer.stopLoading();
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                shimmer.stopLoading();
+                                return false;
+                            }
+                        })
+                        .into(imvAvatar);
             }
         }
 

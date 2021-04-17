@@ -123,7 +123,7 @@ public class ShowImageActivity extends AppCompatActivity {
     }
 
     private void requestPermission(){
-        if (Build.VERSION.SDK_INT>=23){
+        if (Build.VERSION.SDK_INT>=23 && Build.VERSION.SDK_INT<=28){
                if( ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         == PackageManager.PERMISSION_GRANTED){
                    download();
@@ -131,6 +131,8 @@ public class ShowImageActivity extends AppCompatActivity {
             else{
                 ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
             }
+        }else{
+            download();
         }
     }
 
@@ -145,7 +147,7 @@ public class ShowImageActivity extends AppCompatActivity {
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                finish();
+                                dialogInterface.cancel();
                             }
                         });
                 AlertDialog dialog = buider.create();

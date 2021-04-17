@@ -3,9 +3,15 @@ package com.android.touristguide;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -29,8 +35,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.auth.SignInMethodQueryResult;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
 import com.shobhitpuri.custombuttons.GoogleSignInButton;
@@ -51,6 +55,7 @@ public class LoginActivity extends AppCompatActivity {
     private final String TAG = "LoginActivity";
     private AlertDialog loadingDialog;
     private FirebaseFunctions firebaseFunctions;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +72,7 @@ public class LoginActivity extends AppCompatActivity {
         loadingDialog = Helper.createLoadingDialog(this);
         mAuth = FirebaseAuth.getInstance();
         firebaseFunctions = Helper.initFirebaseFunctions();
+
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_client_id))
                 .requestEmail()
@@ -142,6 +148,63 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void requestLocationPermission(){
+        Log.d(TAG,"Logined!");
+        if (Build.VERSION.SDK_INT>=23){
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},2);
+            }else{
+                if (Build.VERSION.SDK_INT>=29 && ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},3);
+                }else{
+                    startMainActivity();
+                }
+            }
+        }else{
+            startMainActivity();
+        }
+    }
+
+    private void showPermissionDeniedDialog(){
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setMessage(getString(R.string.location_permission_denied));
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 2){
+            if (grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                if (Build.VERSION.SDK_INT>=29 &&ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},3);
+                }else{
+                    startMainActivity();
+                }
+            }else{
+                showPermissionDeniedDialog();
+            }
+        }else{
+            if (requestCode==3){
+                if (grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                    startMainActivity();
+                }else{
+                    showPermissionDeniedDialog();
+                }
+            }
+        }
+    }
+
     private void signInWithGoogle(){
         Intent signInWithGoogleIntent = mGoogleSignInClient.getSignInIntent();
         loadingDialog.show();
@@ -170,14 +233,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private void firebaseAuthWithGoogle(final GoogleSignInAccount account) {
         final AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
-//        mAuth.fetchSignInMethodsForEmail(account.getEmail())
-//                .addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<SignInMethodQueryResult> task) {
-//                        boolean isExistingEmail = false;
-//                        if (task)
-//                    }
-//                });
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
@@ -190,11 +245,8 @@ public class LoginActivity extends AppCompatActivity {
                                        public void onComplete(@NonNull Task<HttpsCallableResult> task) {
                                            loadingDialog.cancel();
                                            if (task.isSuccessful()){
-                                               Intent intent = new Intent(LoginActivity.this,MainActivity.class);
-                                               startActivity(intent);
-                                               finish();
+                                               requestLocationPermission();
                                            }else{
-                                               Log.d(TAG,"profile failed");
                                                Toast.makeText(LoginActivity.this, R.string.google_sign_in_failed, Toast.LENGTH_LONG).show();
                                            }
                                        }
@@ -239,9 +291,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()){
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user.isEmailVerified()){
-                            Intent intent = new Intent(LoginActivity.this,MainActivity.class);
-                            startActivity(intent);
-                            finish();
+                            requestLocationPermission();
                         }else{
                             Helper.showEmailVerificationDialog(LoginActivity.this,email,user, Helper.LOGIN_MODE);
                         }
@@ -251,5 +301,10 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+    private void startMainActivity(){
+        Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

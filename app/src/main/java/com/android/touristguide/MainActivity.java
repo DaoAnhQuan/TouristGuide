@@ -5,8 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
+
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -19,6 +22,8 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         loadFragment(new MapFragment());
+        Intent intent = new Intent(this,UpdateLocationService.class);
+        startService(intent);
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -26,13 +31,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             Fragment fragment;
-            switch (item.getItemId()){
+            switch (item.getItemId()) {
                 case R.id.navigation_group:
                     fragment = new MapFragment();
                     loadFragment(fragment);
                     return true;
                 case R.id.navigation_post:
-                    return  true;
+                    return true;
                 case R.id.navigation_notification:
                     return true;
                 case R.id.navigation_account:
@@ -44,9 +49,10 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private void loadFragment(Fragment fragment){
+    private void loadFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_container,fragment);
+        transaction.replace(R.id.frame_container, fragment);
         transaction.commit();
     }
+
 }

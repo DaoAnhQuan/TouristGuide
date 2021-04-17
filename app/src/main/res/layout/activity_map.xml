@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<com.android.touristguide.DisabledConstrainLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/drawer_layout"
+    android:id="@+id/map_layout"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fitsSystemWindows="true">
     <fragment
@@ -11,18 +11,49 @@
         android:layout_height="match_parent"
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment" />
-    <com.arlib.floatingsearchview.FloatingSearchView
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:background="#FFFFFF"
+        android:id="@+id/app_bar">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/top_app_bar_group"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            style="@style/MaterialToolbar"
+            android:theme="@style/ToolbarTheme">
+            <fragment
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+                android:id="@+id/autocomplete_fragment" />
+        </com.google.android.material.appbar.MaterialToolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+        android:id="@+id/disable_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/sv_location"
-        app:floatingSearch_searchBarMarginLeft="5dp"
-        app:floatingSearch_searchBarMarginRight="5dp"
-        app:floatingSearch_searchBarMarginTop="5dp"
-        app:floatingSearch_searchHint="Search..."
-        app:floatingSearch_suggestionsListAnimDuration="250"
-        app:floatingSearch_showSearchKey="false"
-        app:floatingSearch_leftActionMode="showHamburger"
-        app:floatingSearch_close_search_on_keyboard_dismiss="true"/>
-    
+        android:alpha="0.6"
+        android:background="@color/dark_gray"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progress_circular"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            app:indicatorColor="#03A9F4" />
+    </LinearLayout>
+</com.android.touristguide.DisabledConstrainLayout>

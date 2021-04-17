@@ -64,4 +64,9 @@
     <string name="incorrect_password">Password is incorrect!</string>
     <string name="new_password">New password</string>
     <string name="same_password">The new password is the same as the old one!</string>
+    <string name="location_permission_denied">The app needs to access your device\'s location to display and share with other members.</string>
+    <string name="network_and_gps_not_working">The network and GPS on the device are not working.</string>
+    <string name="create_new_group">Create a group</string>
+    <string name="join_group">Join a group</string>
+    <string name="leave">Leave</string>
 </resources>

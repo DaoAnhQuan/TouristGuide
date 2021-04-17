@@ -3,23 +3,31 @@ package com.android.touristguide;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.CountDownTimer;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.FutureTarget;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,11 +39,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class Helper {
     public static final int LOGIN_MODE = 0;
     public static final int SIGN_UP_MODE = 1;
+    public static final String INDIVIDUAL_GROUP = "individual";
+    public static final String TYPE_GROUP="group";
     public static boolean isValidEmail(String email){
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
                 "[a-zA-Z0-9_+&*-]+)*@" +
@@ -156,7 +169,7 @@ public class Helper {
 
     public static FirebaseFunctions initFirebaseFunctions(){
         FirebaseFunctions functions = FirebaseFunctions.getInstance();
-        functions.useEmulator("192.168.1.3",5001);
+        functions.useEmulator("192.168.43.181",5001);
         return functions;
     }
 
@@ -164,10 +177,47 @@ public class Helper {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
         String timestamp = String.valueOf((new Date()).getTime());
-//        String filename = uri.getLastPathSegment();
-//        String extension = filename.substring(filename.lastIndexOf("."));
         String fbFilename = uid+"_"+timestamp;
         return fbFilename;
+    }
+
+    public static Task<List<Member>> getMembersLocation(FirebaseFunctions mFunctions){
+        return mFunctions.getHttpsCallable("getMembersLocation")
+                .call()
+                .continueWith(new Continuation<HttpsCallableResult, List<Member>>() {
+                    @Override
+                    public List<Member> then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        Map<String,Object> result = (Map<String,Object>)task.getResult().getData();
+                        List<Member> members = new ArrayList<>();
+                        for (Map.Entry<String,Object> member:result.entrySet()){
+                            Map<String,Object> map = (HashMap<String,Object>) member.getValue();
+                            Member mem = new Member((String)map.get("uid"),(String)map.get("url"),(Double)map.get("latitude"),
+                                    (Double)map.get("longitude"));
+                            members.add(mem);
+                        }
+                        return members;
+                    }
+                });
+    }
+
+    public static Bitmap getMapMarker(Uri uri,Context context) throws ExecutionException, InterruptedException {
+        View customMarkerView = LayoutInflater.from(context).inflate(R.layout.map_marker,null);
+        CircleImageView imv = customMarkerView.findViewById(R.id.imv_avatar);
+        FutureTarget<Bitmap> futureTarget = Glide.with(customMarkerView).asBitmap().load(uri).submit();
+        Bitmap bitmap = futureTarget.get();
+        imv.setImageBitmap(bitmap);
+        customMarkerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        customMarkerView.layout(0, 0, customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight());
+        customMarkerView.buildDrawingCache();
+        Bitmap returnedBitmap = Bitmap.createBitmap(customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(returnedBitmap);
+        canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_IN);
+        Drawable drawable = customMarkerView.getBackground();
+        if (drawable != null)
+            drawable.draw(canvas);
+        customMarkerView.draw(canvas);
+        return returnedBitmap;
     }
 
     public static List<User> createListUsersForTest(){
@@ -179,5 +229,5 @@ public class Helper {
         users.add(new User("5","Dao Giang","daoawfwefn@gmail.com","0123456789","https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"));
         users.add(new User("6", "Dao Narotu","dawewfwoan@gmail.com","0123456789","https://www.w3schools.com/w3css/img_lights.jpg"));
         return users;
-    }
+}
 }
