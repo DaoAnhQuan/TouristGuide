@@ -1,7 +1,6 @@
 package com.android.touristguide;
 
-import android.Manifest;
-import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -9,10 +8,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -39,7 +38,6 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -53,7 +51,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -129,7 +126,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
 
         });
-
+        Button btnChangeMapLayer = (Button) view.findViewById(R.id.btn_map_layer);
+        btnChangeMapLayer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeMapType();
+            }
+        });
 
         // Specify the types of place data to return.
         autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS));
@@ -156,7 +159,30 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
 
         });
+        toolbar.setOnMenuItemClickListener(groupMenuItemClickListener);
         return view;
+    }
+
+    androidx.appcompat.widget.Toolbar.OnMenuItemClickListener groupMenuItemClickListener = new androidx.appcompat.widget.Toolbar.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem menuItem) {
+            switch (menuItem.getItemId()){
+                case R.id.menu_create_group:
+                    Intent startNewGroupActivity = new Intent(getContext(),NewGroupActivity.class);
+                    startActivity(startNewGroupActivity);
+                    return true;
+                case R.id.menu_join_group:
+                    return true;
+            }
+            return false;
+        }
+    };
+    private void changeMapType(){
+        if (mMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL){
+            mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        }else{
+            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        }
     }
 
     ValueEventListener groupEventListener = new ValueEventListener() {
@@ -169,9 +195,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         Map<String,String> result = task.getResult();
                         String type = result.get("type");
                         if (type.equals(Helper.INDIVIDUAL_GROUP)){
+                            toolbar.getMenu().clear();
                             toolbar.inflateMenu(R.menu.non_group_menu);
                         }else {
-                            toolbar.inflateMenu(R.menu.group_menu);
+                            if (type.equals(Helper.LEADER_GROUP)){
+                                toolbar.getMenu().clear();
+                                toolbar.inflateMenu(R.menu.leader_menu);
+                            }else{
+                                toolbar.getMenu().clear();
+                                toolbar.inflateMenu(R.menu.member_menu);
+                            }
                         }
                         membersRef = db.getReference("Groups/"+result.get("groupID")+"/members");
                         membersRef.addValueEventListener(membersEventListener);
@@ -218,7 +251,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                     public void run() {
                                         Bitmap markerBitmap = null;
                                         try {
-                                            markerBitmap = Helper.getMapMarker(Uri.parse(member.url),getContext());
+                                            if (member.url != null){
+                                                markerBitmap = Helper.getMapMarker(Uri.parse(member.url),getContext());
+                                            }else{
+                                                markerBitmap = Helper.getMapMarker(null,getContext());
+                                            }
                                         } catch (ExecutionException | InterruptedException e) {
                                             e.printStackTrace();
                                         }

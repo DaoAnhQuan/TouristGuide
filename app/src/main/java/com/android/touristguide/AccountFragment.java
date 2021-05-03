@@ -390,7 +390,6 @@ public class AccountFragment extends Fragment implements BSImagePicker.OnSingleI
 
     @Override
     public void onSingleImageSelected(Uri uri, String tag) {
-        Log.d("ImagePicker",uri.toString());
         final String fbFilename = Helper.createFirebaseStorageFilename(uri);
         final StorageReference ref = storage.getReference().child(fbFilename);
         UploadTask uploadTask = ref.putFile(uri);

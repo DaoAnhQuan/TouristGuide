@@ -79,4 +79,9 @@
         <item name="android:button">@drawable/circle_checkbox</item>
         <item name="android:background">@color/transparent</item>
     </style>
+    <style name="GroupSubmitButtonForm" parent="Theme.MaterialComponents">
+        <item name="colorOnPrimary">#2196F3</item>
+        <item name="colorPrimary">#2196F3</item>
+        <item name="colorOnSurface">#2196F3</item>
+    </style>
 </resources>

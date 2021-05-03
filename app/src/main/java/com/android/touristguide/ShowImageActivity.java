@@ -86,7 +86,9 @@ public class ShowImageActivity extends AppCompatActivity {
         String updateTime = imageBundle.getString("update_time");
         final CircularProgressIndicator progressIndicator = findViewById(R.id.prg_image);
 
-        storageRef = storage.getReferenceFromUrl(imagePath);
+        if (download){
+            storageRef = storage.getReferenceFromUrl(imagePath);
+        }
         Glide.with(this)
                 .load(Uri.parse(imagePath))
                 .listener(new RequestListener<Drawable>() {

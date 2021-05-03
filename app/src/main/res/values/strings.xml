@@ -69,4 +69,9 @@
     <string name="create_new_group">Create a group</string>
     <string name="join_group">Join a group</string>
     <string name="leave">Leave</string>
+    <string name="share_location_setting">Do you want to share location with other members?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="chat">Chat</string>
+    <string name="change_leader">Change leader</string>
 </resources>

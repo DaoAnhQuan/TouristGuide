@@ -14,6 +14,7 @@
             android:layout_height="match_parent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/group_setting"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="?attr/actionBarSize"
@@ -25,7 +26,6 @@
                     android:id="@+id/btn_group_photo"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    android:layout_marginLeft="24dp"
                     android:layout_marginTop="10dp"
                     app:icon="@drawable/ic_baseline_camera_alt_24"
                     app:iconTint="#555555"
@@ -54,13 +54,11 @@
                     android:id="@+id/btn_submit_group_info"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
-                    android:layout_marginRight="24dp"
                     android:layout_marginTop="10dp"
                     app:icon="@drawable/ic_baseline_check_24"
-                    app:iconTint="#2196F3"
                     app:iconSize="35sp"
                     style="@style/Widget.App.Button.OutlinedButton.IconOnly"
-                    android:theme="@style/FormButton"
+                    android:theme="@style/GroupSubmitButtonForm"
                     android:layout_marginEnd="24dp" />
             </androidx.constraintlayout.widget.ConstraintLayout>
             <com.google.android.material.appbar.MaterialToolbar
@@ -79,15 +77,17 @@
                         android:layout_width="?attr/actionBarSize"
                         android:layout_height="?attr/actionBarSize"
                         android:padding="5dp"
+                        android:id="@+id/imv_group_photo"
                         app:civ_circle_background_color="@android:color/darker_gray"
                         android:src="@drawable/ic_baseline_person_gray_24"
                         />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:id="@+id/tv_group_name"
                         android:text="@string/new_group"
                         android:textColor="#000000"
-                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
                         android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"/>
 
                 </LinearLayout>
@@ -116,7 +116,7 @@
             android:hint="@string/search_user"
             android:textColorHint="@android:color/darker_gray"
             android:background="@drawable/edittext_border"
-            android:drawableLeft="@drawable/ic_baseline_search_24"
+            android:drawableStart="@drawable/ic_baseline_search_24"
             android:minHeight="40sp"
             android:paddingStart="10dp" />
         <TextView
@@ -141,4 +141,5 @@
             android:layout_marginLeft="24dp"
             android:layout_marginRight="24dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <include layout="@layout/bottom_sheet_add_user"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

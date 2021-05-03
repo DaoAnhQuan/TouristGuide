@@ -6,14 +6,24 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 
 
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
+    private BadgeDrawable notificationBadge;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +31,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        notificationBadge = navigation.getOrCreateBadge(R.id.navigation_notification);
+        notificationBadge.setBadgeTextColor(Color.parseColor("#FFFFFF"));
+        notificationBadge.setBackgroundColor(Color.parseColor("#FF0000"));
+        FirebaseDatabase mDatabase = FirebaseDatabase.getInstance();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference numberOfNotificationRef = mDatabase.getReference("Users/"+user.getUid()+"/number_of_notifications");
+        numberOfNotificationRef.addValueEventListener(numberOfNotificationEventListener);
         loadFragment(new MapFragment());
         Intent intent = new Intent(this,UpdateLocationService.class);
         startService(intent);
@@ -46,6 +63,29 @@ public class MainActivity extends AppCompatActivity {
                     return true;
             }
             return false;
+        }
+    };
+
+    ValueEventListener numberOfNotificationEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            Long numNotLong = (Long) snapshot.getValue();
+            int numNot = numNotLong.intValue();
+            Log.d("MainActivityTAG",String.valueOf(numNot));
+            if (notificationBadge != null){
+                if (numNot == 0){
+                    notificationBadge.setVisible(false);
+                    notificationBadge.clearNumber();
+                }else{
+                    notificationBadge.setVisible(true);
+                    notificationBadge.setNumber(numNot);
+                }
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+
         }
     };
 

@@ -48,7 +48,8 @@ public class Helper {
     public static final int LOGIN_MODE = 0;
     public static final int SIGN_UP_MODE = 1;
     public static final String INDIVIDUAL_GROUP = "individual";
-    public static final String TYPE_GROUP="group";
+    public static final String MEMBER_GROUP="member";
+    public static final String LEADER_GROUP = "leader";
     public static boolean isValidEmail(String email){
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
                 "[a-zA-Z0-9_+&*-]+)*@" +
@@ -203,9 +204,14 @@ public class Helper {
     public static Bitmap getMapMarker(Uri uri,Context context) throws ExecutionException, InterruptedException {
         View customMarkerView = LayoutInflater.from(context).inflate(R.layout.map_marker,null);
         CircleImageView imv = customMarkerView.findViewById(R.id.imv_avatar);
-        FutureTarget<Bitmap> futureTarget = Glide.with(customMarkerView).asBitmap().load(uri).submit();
-        Bitmap bitmap = futureTarget.get();
-        imv.setImageBitmap(bitmap);
+        if (uri != null){
+            FutureTarget<Bitmap> futureTarget = Glide.with(customMarkerView).asBitmap().load(uri).submit();
+            Bitmap bitmap = futureTarget.get();
+            imv.setImageBitmap(bitmap);
+        }else{
+            imv.setCircleBackgroundColor(Color.parseColor("#aaaaaa"));
+            imv.setImageResource(R.drawable.ic_baseline_person_white_24);
+        }
         customMarkerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         customMarkerView.layout(0, 0, customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight());
         customMarkerView.buildDrawingCache();
@@ -220,14 +226,24 @@ public class Helper {
         return returnedBitmap;
     }
 
-    public static List<User> createListUsersForTest(){
-        List<User> users = new ArrayList<User>();
-        users.add(new User("1","Dao Quan","daoan@gmail.com","0123456789","https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"));
-        users.add(new User("2","Dao Giang","daoawfwefn@gmail.com","0123456789","https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"));
-        users.add(new User("3","Dao Narotu","dawewfwoan@gmail.com","0123456789","https://www.w3schools.com/w3css/img_lights.jpg"));
-        users.add(new User("4","Dao Quan","daoan@gmail.com","0123456789","https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png"));
-        users.add(new User("5","Dao Giang","daoawfwefn@gmail.com","0123456789","https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg"));
-        users.add(new User("6", "Dao Narotu","dawewfwoan@gmail.com","0123456789","https://www.w3schools.com/w3css/img_lights.jpg"));
-        return users;
-}
+    public static Task<List<User>> searchUsers(String query) throws Exception{
+        FirebaseFunctions mFunctions = initFirebaseFunctions();
+        Map<String,String> data = new HashMap<>();
+        data.put("query",query);
+        return  mFunctions.getHttpsCallable("searchUser")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, List<User>>() {
+                    @Override
+                    public List<User> then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        Map<String,Object> result = (Map<String,Object>) task.getResult().getData();
+                        List<User> listUser = new ArrayList<>();
+                        for (Map.Entry<String,Object> user:result.entrySet()){
+                            Map<String,Object> map = (Map<String,Object>) user.getValue();
+                            User rUser = new User((String)map.get("uid"),(String)map.get("username"),(String)map.get("url"));
+                            listUser.add(rUser);
+                        }
+                        return listUser;
+                    }
+                });
+    }
 }
