@@ -5,6 +5,18 @@
         android:title="@string/chat"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/menu_member"
+        android:title="@string/members"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_get_group_code"
+        android:title="@string/get_group_code"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_turn_on_location_sharing"
+        android:title="@string/turn_on_location_sharing"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/menu_change_leader"
         android:title="@string/change_leader"
         app:showAsAction="never"/>

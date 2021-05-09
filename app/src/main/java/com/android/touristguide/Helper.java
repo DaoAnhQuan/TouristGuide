@@ -10,6 +10,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.CountDownTimer;
 import android.text.Html;
 import android.text.SpannableString;
@@ -172,6 +173,14 @@ public class Helper {
         FirebaseFunctions functions = FirebaseFunctions.getInstance();
         functions.useEmulator("192.168.43.181",5001);
         return functions;
+    }
+
+    public static void setHtmlToTextView(TextView tv, String content){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            tv.setText(Html.fromHtml(content, Html.FROM_HTML_MODE_COMPACT));
+        } else {
+            tv.setText(Html.fromHtml(content));
+        }
     }
 
     public static String createFirebaseStorageFilename(Uri uri){

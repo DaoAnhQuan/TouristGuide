@@ -167,7 +167,7 @@ public class NewGroupActivity extends AppCompatActivity implements BSImagePicker
                     public void onComplete(@NonNull Task<HttpsCallableResult> task) {
                         loadingDialog.cancel();
                         if (task.isSuccessful()){
-                            showTurnOnLocationSharing(NewGroupActivity.this,mFunctions);
+                            showTurnOnLocationSharing(NewGroupActivity.this,mFunctions,true);
                         }else{
                             Log.d(TAG,task.getException().getMessage());
                         }
@@ -175,36 +175,39 @@ public class NewGroupActivity extends AppCompatActivity implements BSImagePicker
                 });
     }
 
-    public static void showTurnOnLocationSharing(final Context context, final FirebaseFunctions mFunctions){
+    public static void showTurnOnLocationSharing(final Context context, final FirebaseFunctions mFunctions, final boolean finishCurrentActivity){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage(R.string.share_location_setting)
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.cancel();
-                        Map<String,String> data = new HashMap<>();
-                        data.put("result","yes");
-                        mFunctions.getHttpsCallable("updateLocationSetting")
-                                .call(data);
+                        updateLocationSetting(mFunctions,"yes");
                     }
                 })
                 .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.cancel();
-                        Map<String,String> data = new HashMap<>();
-                        data.put("result","no");
-                        mFunctions.getHttpsCallable("updateLocationSetting")
-                                .call(data);
+                        updateLocationSetting(mFunctions,"no");
                     }
                 }).setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialogInterface) {
-                        Helper.finishActivityFromContext(context);
+                        if (finishCurrentActivity){
+                            Helper.finishActivityFromContext(context);
+                        }
                     }
                 });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public static void updateLocationSetting(FirebaseFunctions mFunctions, String result){
+        Map<String,String> data = new HashMap<>();
+        data.put("result",result);
+        mFunctions.getHttpsCallable("updateLocationSetting")
+                .call(data);
     }
 
     Button.OnClickListener btnGroupPhotoOnclickListener = new Button.OnClickListener() {

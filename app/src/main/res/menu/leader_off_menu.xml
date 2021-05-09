@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
@@ -14,8 +13,12 @@
         android:title="@string/get_group_code"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/menu_turn_on_location_sharing"
-        android:title="@string/turn_on_location_sharing"
+        android:id="@+id/menu_turn_off_location_sharing"
+        android:title="@string/turn_off_location_sharing"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_change_leader"
+        android:title="@string/change_leader"
         app:showAsAction="never"/>
     <item
         android:id="@+id/menu_leave"

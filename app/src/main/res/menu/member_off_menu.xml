@@ -14,8 +14,8 @@
         android:title="@string/get_group_code"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/menu_turn_on_location_sharing"
-        android:title="@string/turn_on_location_sharing"
+        android:id="@+id/menu_turn_off_location_sharing"
+        android:title="@string/turn_off_location_sharing"
         app:showAsAction="never"/>
     <item
         android:id="@+id/menu_leave"

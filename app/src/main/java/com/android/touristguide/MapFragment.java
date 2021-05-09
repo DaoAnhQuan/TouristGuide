@@ -1,18 +1,27 @@
 package com.android.touristguide;
 
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -74,6 +83,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private Map<String,Boolean> addMarkerProcessing;
     private MaterialToolbar toolbar;
     private Marker searchMarker;
+    private String groupType;
+    private String groupID;
+    private boolean firstTime;
 
     public MapFragment(){
 
@@ -99,7 +111,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
         Bundle bundle = app.metaData;
         Places.initialize(getContext(),bundle.getString("com.google.android.geo.API_KEY"));
-
+        firstTime = true;
     }
 
     @Nullable
@@ -122,7 +134,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onClick(View view) {
                 autocompleteFragment.setText("");
-                searchMarker.remove();
+                searchMarker.setVisible(false);
             }
 
         });
@@ -144,6 +156,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 LatLng latLng = place.getLatLng();
                 try {
                     searchMarker.setPosition(latLng);
+                    searchMarker.setVisible(true);
                 }catch (NullPointerException e){
                     searchMarker = mMap.addMarker(new MarkerOptions()
                             .position(latLng));
@@ -172,11 +185,127 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     startActivity(startNewGroupActivity);
                     return true;
                 case R.id.menu_join_group:
+                    showJoinGroupDialog();
+                    return true;
+                case R.id.menu_leave:
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setMessage(R.string.leave_group_confirm)
+                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    toolbar.getMenu().clear();
+                                    mFunctions.getHttpsCallable("leaveGroup")
+                                            .call();
+                                    dialogInterface.cancel();
+                                }
+                            })
+                            .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.cancel();
+                                }
+                            });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                    return true;
+                case R.id.menu_turn_off_location_sharing:
+                    NewGroupActivity.updateLocationSetting(mFunctions,"no");
+                    setMapMenu(groupType,"off");
+                    return true;
+                case R.id.menu_turn_on_location_sharing:
+                    NewGroupActivity.updateLocationSetting(mFunctions,"yes");
+                    setMapMenu(groupType,"on");
+                    return true;
+                case R.id.menu_change_leader:
+                    return true;
+                case R.id.menu_get_group_code:
+                    getGroupCode();
+                    return true;
+                case R.id.menu_member:
+                    Intent intent = new Intent(getContext(),MembersActivity.class);
+                    intent.putExtra("group_type",groupType);
+                    startActivity(intent);
                     return true;
             }
             return false;
         }
     };
+
+    private void showJoinGroupDialog(){
+        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+        View view = layoutInflater.inflate(R.layout.join_group_layout,null);
+        final AlertDialog joinGroupDialog = new AlertDialog.Builder(getContext()).create();
+        Button btnCancel = (Button) view.findViewById(R.id.btn_cancel);
+        final EditText edGroupCode = (EditText) view.findViewById(R.id.ed_group_code);
+        final Button btnJoin = (Button) view.findViewById(R.id.btn_join);
+        btnJoin.setEnabled(false);
+        edGroupCode.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String text = editable.toString();
+                if (text.length()==0){
+                    btnJoin.setEnabled(false);
+                }else{
+                    btnJoin.setEnabled(true);
+                }
+            }
+        });
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                joinGroupDialog.cancel();
+            }
+        });
+        btnJoin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                joinGroupDialog.cancel();
+                joinGroup(edGroupCode.getText().toString()).addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if(task.isSuccessful()){
+                            String result = task.getResult();
+                            if (result.equals("failed")){
+                                Toast.makeText(getContext(),R.string.accept_invitation_failed,Toast.LENGTH_LONG).show();
+                            }else{
+                                if (result.equals("joined")){
+                                    NewGroupActivity.showTurnOnLocationSharing(getContext(),mFunctions,false);
+                                }else{
+                                    Toast.makeText(getContext(),R.string.join_request_send,Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        joinGroupDialog.setView(view);
+        joinGroupDialog.show();
+    }
+
+    private Task<String> joinGroup(String groupID){
+        Map<String,String> data = new HashMap<>();
+        data.put("groupID",groupID);
+        return mFunctions.getHttpsCallable("joinGroup")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, String>() {
+                    @Override
+                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        return task.getResult().getData().toString();
+                    }
+                });
+    }
+
     private void changeMapType(){
         if (mMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL){
             mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
@@ -194,20 +323,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     if (task.isSuccessful()){
                         Map<String,String> result = task.getResult();
                         String type = result.get("type");
-                        if (type.equals(Helper.INDIVIDUAL_GROUP)){
-                            toolbar.getMenu().clear();
-                            toolbar.inflateMenu(R.menu.non_group_menu);
-                        }else {
-                            if (type.equals(Helper.LEADER_GROUP)){
-                                toolbar.getMenu().clear();
-                                toolbar.inflateMenu(R.menu.leader_menu);
-                            }else{
-                                toolbar.getMenu().clear();
-                                toolbar.inflateMenu(R.menu.member_menu);
-                            }
-                        }
-                        membersRef = db.getReference("Groups/"+result.get("groupID")+"/members");
+                        String id = result.get("groupID");
+                        String locationSharing = result.get("location sharing");
+                        groupType = type;
+                        groupID = id;
+                        db.getReference("Groups/"+id+"/members/"+currentUser.getUid()+"/state").addValueEventListener(permissionChange);
+                        setMapMenu(type,locationSharing);
+                        membersRef = db.getReference("Groups/"+id+"/members");
                         membersRef.addValueEventListener(membersEventListener);
+
                     }
                 }
             });
@@ -218,6 +342,53 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             Log.d(TAG,"On Failed");
         }
     };
+
+    ValueEventListener permissionChange = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            getGroupType().addOnCompleteListener(new OnCompleteListener<Map<String,String>>() {
+                @Override
+                public void onComplete(@NonNull Task<Map<String,String>> task) {
+                    if (task.isSuccessful()){
+                        Map<String,String> result = task.getResult();
+                        String type = result.get("type");
+                        groupType = type;
+                        String locationSharing = result.get("location sharing");
+                        setMapMenu(type,locationSharing);
+                    }
+                }
+            });
+        }
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+
+        }
+    };
+
+    private void setMapMenu(String type, String locationSharing){
+        if (type.equals(Helper.INDIVIDUAL_GROUP)){
+            toolbar.getMenu().clear();
+            toolbar.inflateMenu(R.menu.non_group_menu);
+        }else {
+            if (type.equals(Helper.LEADER_GROUP)){
+                if (locationSharing.equals("off")){
+                    toolbar.getMenu().clear();
+                    toolbar.inflateMenu(R.menu.leader_menu);
+                }else{
+                    toolbar.getMenu().clear();
+                    toolbar.inflateMenu(R.menu.leader_off_menu);
+                }
+            }else{
+                if (locationSharing.equals("off")){
+                    toolbar.getMenu().clear();
+                    toolbar.inflateMenu(R.menu.member_menu);
+                }else{
+                    toolbar.getMenu().clear();
+                    toolbar.inflateMenu(R.menu.member_off_menu);
+                }
+            }
+        }
+    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -238,7 +409,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 @Override
                 public void onComplete(@NonNull Task<List<Member>> task) {
                     LatLng location = new LatLng(0,0);
-                    for (final Member member : task.getResult()){
+                    List<Member> members = task.getResult();
+                    Map<String,Boolean> checked = new HashMap<>();
+                    for (final Member member : members){
+                        checked.put(member.uid,true);
                         final LatLng latLng = new LatLng(member.latitude,member.longitude);
                         if (mapMarker.containsKey(member.uid)){
                             Marker marker = mapMarker.get(member.uid);
@@ -251,10 +425,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                     public void run() {
                                         Bitmap markerBitmap = null;
                                         try {
-                                            if (member.url != null){
-                                                markerBitmap = Helper.getMapMarker(Uri.parse(member.url),getContext());
-                                            }else{
-                                                markerBitmap = Helper.getMapMarker(null,getContext());
+                                            if (getContext() != null){
+                                                if (member.url != null){
+                                                    markerBitmap = Helper.getMapMarker(Uri.parse(member.url),getContext());
+                                                }else{
+                                                    markerBitmap = Helper.getMapMarker(null,getContext());
+                                                }
                                             }
                                         } catch (ExecutionException | InterruptedException e) {
                                             e.printStackTrace();
@@ -262,13 +438,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                         final MarkerOptions markerOption = new MarkerOptions()
                                                 .position(latLng)
                                                 .icon(BitmapDescriptorFactory.fromBitmap(markerBitmap));
-                                        getActivity().runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                Marker marker = mMap.addMarker(markerOption);
-                                                mapMarker.put(member.uid,marker);
-                                            }
-                                        });
+                                        if (getActivity() != null){
+                                            getActivity().runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    Marker marker = mMap.addMarker(markerOption);
+                                                    mapMarker.put(member.uid,marker);
+                                                }
+                                            });
+                                        }
                                     }
                                 };
                                 executor.execute(addMarker);
@@ -276,11 +454,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         }
                         location = latLng;
                     }
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location,10.0f));
+                    for (Map.Entry<String,Marker> memberMarker:mapMarker.entrySet()){
+                        String key = memberMarker.getKey();
+                        Marker marker = memberMarker.getValue();
+                        if (!checked.containsKey(key)){
+                            marker.remove();
+                            mapMarker.remove(key);
+                            addMarkerProcessing.remove(key);
+                        }
+                    }
+                    if (firstTime){
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location,10.0f));
+                        firstTime = false;
+                    }
                     enableLayout();
                 }
             });
-
         }
 
         @Override
@@ -296,6 +485,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             layoutDisabled.setAlpha(0.0f);
             disable = false;
         }
+    }
+
+    private void getGroupCode(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        String message = getString(R.string.your_group_code_is)+groupID;
+        builder.setMessage(message)
+                .setPositiveButton(R.string.copy, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (getActivity() != null){
+                            ClipboardManager clipboard = (ClipboardManager)
+                                    getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+                            ClipData clip = ClipData.newPlainText("simple text", groupID);
+                            clipboard.setPrimaryClip(clip);
+                            dialogInterface.cancel();
+                        }
+                    }
+                })
+        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        builder.create().show();
     }
 
     private Task<Map<String,String>> getGroupType(){

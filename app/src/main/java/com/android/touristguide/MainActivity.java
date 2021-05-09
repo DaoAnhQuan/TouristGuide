@@ -24,6 +24,9 @@ import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
     private BadgeDrawable notificationBadge;
+    private int currentID = R.id.navigation_group;
+    private FirebaseDatabase mDatabase;
+    private FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
         notificationBadge = navigation.getOrCreateBadge(R.id.navigation_notification);
         notificationBadge.setBadgeTextColor(Color.parseColor("#FFFFFF"));
         notificationBadge.setBackgroundColor(Color.parseColor("#FF0000"));
-        FirebaseDatabase mDatabase = FirebaseDatabase.getInstance();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        mDatabase = FirebaseDatabase.getInstance();
+        user = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference numberOfNotificationRef = mDatabase.getReference("Users/"+user.getUid()+"/number_of_notifications");
         numberOfNotificationRef.addValueEventListener(numberOfNotificationEventListener);
         loadFragment(new MapFragment());
@@ -50,17 +53,35 @@ public class MainActivity extends AppCompatActivity {
             Fragment fragment;
             switch (item.getItemId()) {
                 case R.id.navigation_group:
-                    fragment = new MapFragment();
-                    loadFragment(fragment);
-                    return true;
+                    if (currentID != R.id.navigation_group){
+                        currentID = R.id.navigation_group;
+                        fragment = new MapFragment();
+                        loadFragment(fragment);
+                        return true;
+                    }else{
+                        return false;
+                    }
                 case R.id.navigation_post:
                     return true;
                 case R.id.navigation_notification:
-                    return true;
+                    if (currentID != R.id.navigation_notification){
+                        mDatabase.getReference("Users/"+user.getUid()+"/number_of_notifications").setValue(0);
+                        currentID = R.id.navigation_notification;
+                        fragment = new NotificationFragment();
+                        loadFragment(fragment);
+                        return true;
+                    }else{
+                        return false;
+                    }
                 case R.id.navigation_account:
-                    fragment = new AccountFragment();
-                    loadFragment(fragment);
-                    return true;
+                    if (currentID != R.id.navigation_account){
+                        currentID = R.id.navigation_account;
+                        fragment = new AccountFragment();
+                        loadFragment(fragment);
+                        return true;
+                    }else{
+                        return false;
+                    }
             }
             return false;
         }
