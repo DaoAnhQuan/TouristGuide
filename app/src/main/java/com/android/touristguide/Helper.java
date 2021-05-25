@@ -2,7 +2,12 @@ package com.android.touristguide;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -24,6 +29,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
@@ -130,7 +136,7 @@ public class Helper {
         View loadingDialogView = layoutInflater.inflate(R.layout.loading_dialog,null);
         final AlertDialog loadingDialog = new AlertDialog.Builder(context).create();
         loadingDialog.setView(loadingDialogView);
-        loadingDialog.setCanceledOnTouchOutside(false);
+        loadingDialog.setCancelable(false);
         return loadingDialog;
     }
 
@@ -150,7 +156,7 @@ public class Helper {
     }
 
     public static void loadAvatar(String url, ImageView imv, View parent, Context context,int drawableId ){
-        if (url != null){
+        if (url != null && url.length()>0){
             Glide.with(parent).load(url).into(imv);
         }else{
             Glide.with(parent).load(ContextCompat.getDrawable(context,drawableId)).into(imv);
@@ -173,6 +179,37 @@ public class Helper {
         FirebaseFunctions functions = FirebaseFunctions.getInstance();
         functions.useEmulator("192.168.43.181",5001);
         return functions;
+    }
+
+    public static void createNotification(Context context,String title, String content){
+        NotificationManager mNotificationManager;
+
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(context.getApplicationContext(), "SOSNotification");
+        Intent ii = new Intent(context.getApplicationContext(), MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, ii, 0);
+
+        mBuilder.setContentIntent(pendingIntent);
+        mBuilder.setSmallIcon(R.drawable.app_logo);
+        mBuilder.setContentTitle(title);
+        mBuilder.setContentText(content);
+        mBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
+
+        mNotificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            String channelId = "SOSNotification";
+            NotificationChannel channel = new NotificationChannel(
+                    channelId,
+                    "SOS Notification",
+                    NotificationManager.IMPORTANCE_HIGH);
+            mNotificationManager.createNotificationChannel(channel);
+            mBuilder.setChannelId(channelId);
+        }
+
+        mNotificationManager.notify(0, mBuilder.build());
     }
 
     public static void setHtmlToTextView(TextView tv, String content){
@@ -202,7 +239,7 @@ public class Helper {
                         for (Map.Entry<String,Object> member:result.entrySet()){
                             Map<String,Object> map = (HashMap<String,Object>) member.getValue();
                             Member mem = new Member((String)map.get("uid"),(String)map.get("url"),(Double)map.get("latitude"),
-                                    (Double)map.get("longitude"));
+                                    (Double)map.get("longitude"), (Boolean) map.get("sos"));
                             members.add(mem);
                         }
                         return members;
@@ -210,8 +247,15 @@ public class Helper {
                 });
     }
 
-    public static Bitmap getMapMarker(Uri uri,Context context) throws ExecutionException, InterruptedException {
+    public static Bitmap getMapMarker(Uri uri,Context context, boolean sos) throws ExecutionException, InterruptedException {
         View customMarkerView = LayoutInflater.from(context).inflate(R.layout.map_marker,null);
+        ImageView imvBackground = customMarkerView.findViewById(R.id.imv_background);
+        if (!sos){
+            imvBackground.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.ic_baseline_person_pin_24));
+        }else{
+            imvBackground.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.ic_baseline_person_pin_red));
+
+        }
         CircleImageView imv = customMarkerView.findViewById(R.id.imv_avatar);
         if (uri != null){
             FutureTarget<Bitmap> futureTarget = Glide.with(customMarkerView).asBitmap().load(uri).submit();

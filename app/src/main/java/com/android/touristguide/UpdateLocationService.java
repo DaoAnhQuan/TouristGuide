@@ -20,6 +20,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
 
@@ -32,15 +34,15 @@ import java.util.TimerTask;
 public class UpdateLocationService extends Service implements LocationListener {
     boolean isGPSEnable = false;
     boolean isNetworkEnable = false;
-    double latitude, longitude;
-    LocationManager locationManager;
-    Location location;
+    private LocationManager locationManager;
+    private Location location;
     private Handler mHandler = new Handler();
     private Timer mTimer = null;
-    long notify_interval = 1000;
+    long notify_interval = 5000;
     public static String str_receiver = "servicetutorial.service.receiver";
-    Intent intent;
+    private Intent intent;
     private FirebaseFunctions mFunctions;
+    private FirebaseDatabase db;
 
 
     public UpdateLocationService() {
@@ -55,6 +57,7 @@ public class UpdateLocationService extends Service implements LocationListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
         return START_STICKY;
     }
 
@@ -66,12 +69,11 @@ public class UpdateLocationService extends Service implements LocationListener {
         mTimer.schedule(new TimerTaskToGetLocation(), 5, notify_interval);
         intent = new Intent(str_receiver);
         mFunctions = Helper.initFirebaseFunctions();
-//        fn_getlocation();
+        db = FirebaseDatabase.getInstance();
     }
 
     @Override
     public void onLocationChanged(Location location) {
-
     }
 
     @Override
@@ -135,11 +137,6 @@ public class UpdateLocationService extends Service implements LocationListener {
                 }
 
             }
-
-
-
-
-
         }
 
     }

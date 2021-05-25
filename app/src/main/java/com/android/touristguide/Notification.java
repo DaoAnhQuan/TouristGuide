@@ -4,6 +4,8 @@ public class Notification {
     public String type;
     public static final String INVITATION_TYPE = "invitation";
     public static final String JOIN_REQUEST_TYPE= "join request";
+    public static final String JOIN_REQUEST_RESPONSE_TYPE = "join request response";
+    public static final String REMOVE_MEMBER_TYPE = "remove member";
     public String content;
     public String url;
     public String id;

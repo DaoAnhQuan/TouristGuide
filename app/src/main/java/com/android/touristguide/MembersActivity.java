@@ -1,19 +1,27 @@
 package com.android.touristguide;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ethanhua.skeleton.Skeleton;
 import com.ethanhua.skeleton.SkeletonScreen;
 import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
 
@@ -29,11 +37,12 @@ public class MembersActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_members);
         MaterialToolbar toolbar = (MaterialToolbar) findViewById(R.id.top_app_bar_members);
-        RecyclerView rcvMembers = (RecyclerView) findViewById(R.id.rcv_members);
+        final RecyclerView rcvMembers = (RecyclerView) findViewById(R.id.rcv_members);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         rcvMembers.setLayoutManager(linearLayoutManager);
         screen = Skeleton.bind(rcvMembers).show();
-        String groupType = getIntent().getStringExtra("group_type");
+        final String groupType = getIntent().getStringExtra("group_type");
+        final String groupID = getIntent().getStringExtra("group_id");
         if (groupType != null && groupType.equals("leader")){
             toolbar.inflateMenu(R.menu.add_member_menu);
         }
@@ -44,6 +53,36 @@ public class MembersActivity extends AppCompatActivity {
             }
         });
         mFunctions = Helper.initFirebaseFunctions();
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        db.getReference("Groups/"+groupID+"/members").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                getMembers(mFunctions).addOnCompleteListener(new OnCompleteListener<List<User>>() {
+                    @Override
+                    public void onComplete(@NonNull Task<List<User>> task) {
+                        screen.hide();
+                        if (task.isSuccessful()){
+                            ListMembersAdapter membersAdapter = new ListMembersAdapter(MembersActivity.this,task.getResult(),groupType,null);
+                            rcvMembers.setAdapter(membersAdapter);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(MembersActivity.this,NewGroupActivity.class);
+                intent.putExtra("add_member",true);
+                startActivity(intent);
+                return true;
+            }
+        });
     }
 
     public static Task<List<User>> getMembers(FirebaseFunctions mFunctions){

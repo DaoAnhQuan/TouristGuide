@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:background="@android:color/white"
+        android:id="@+id/app_bar">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/top_app_bar_account"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#FFFFFF"
+            style="@style/MaterialToolbar"
+            android:theme="@style/ToolbarTheme">
+            <Spinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/spinner"/>
+        </com.google.android.material.appbar.MaterialToolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/app_bar"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginTop="5dp"
+        android:id="@+id/ed_search_post"
+        android:maxLines="1"
+        android:inputType="text"
+        android:imeOptions="actionSearch"
+        android:theme="@style/LoginEditext"
+        android:hint="@string/search"
+        android:textColorHint="@android:color/darker_gray"
+        android:background="@drawable/edittext_border"
+        android:drawableStart="@drawable/ic_baseline_search_24"
+        android:minHeight="40sp"
+        android:paddingStart="10dp" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcv_topic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/ed_search_post"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="24dp"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcv_posts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:layout_marginTop="5dp"
+        app:layout_constraintTop_toBottomOf="@+id/horizontal_scrollview"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/btn_new_post"
+        app:cornerRadius="25dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginBottom="80dp"
+        android:layout_marginEnd="24dp"
+        app:backgroundTint="#00BCD4"
+        app:strokeColor="@android:color/darker_gray"
+        app:strokeWidth="1dp"
+        app:icon="@drawable/ic_baseline_add_24"
+        app:iconTint="#555555"
+        style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+        android:theme="@style/FormButton" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

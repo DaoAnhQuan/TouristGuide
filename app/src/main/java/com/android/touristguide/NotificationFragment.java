@@ -27,13 +27,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import aglibs.loading.skeleton.layout.SkeletonRecyclerView;
 
 public class NotificationFragment extends Fragment {
     private FirebaseDatabase db;
@@ -61,6 +63,7 @@ public class NotificationFragment extends Fragment {
         View view = inflater.inflate(R.layout.activity_notification, container, false);
         rcvNotifications = (RecyclerView) view.findViewById(R.id.rcv_notifications);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        linearLayoutManager.setReverseLayout(true);
         rcvNotifications.setLayoutManager(linearLayoutManager);
         skeletonScreen = Skeleton.bind(rcvNotifications).show();
         tvNoNotification = (TextView) view.findViewById(R.id.tv_no_notification);
@@ -101,9 +104,10 @@ public class NotificationFragment extends Fragment {
                     @Override
                     public List<Notification> then(@NonNull Task<HttpsCallableResult> task) throws Exception {
                         List<Notification> listNotifications = new ArrayList<>();
-                        Map<String,Object> notifications = (Map<String,Object>)task.getResult().getData();
+                        JSONObject jsonObject = new JSONObject(task.getResult().getData().toString());
+                        LinkedTreeMap<String,Object> notifications = new Gson().fromJson(jsonObject.toString(),LinkedTreeMap.class);
                         for (Map.Entry<String,Object> notification:notifications.entrySet()){
-                            Map<String,String> map = (HashMap<String,String>)notification.getValue();
+                            Map<String,String> map = (LinkedTreeMap<String,String>)notification.getValue();
                             Notification nof = new Notification(map.get("id"),map.get("type"),map.get("content"),map.get("url"),map.get("time"));
                             listNotifications.add(nof);
                         }

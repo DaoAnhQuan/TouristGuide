@@ -111,7 +111,8 @@
             android:layout_marginTop="10dp"
             android:id="@+id/ed_search_user"
             android:maxLines="1"
-            android:inputType="textEmailAddress"
+            android:inputType="text"
+            android:imeOptions="actionSearch"
             android:theme="@style/LoginEditext"
             android:hint="@string/search_user"
             android:textColorHint="@android:color/darker_gray"
@@ -140,6 +141,16 @@
             android:layout_marginTop="10dp"
             android:layout_marginLeft="24dp"
             android:layout_marginRight="24dp"/>
+        <TextView
+            android:id="@+id/tv_no_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/tv_selected"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="@string/no_user_found"
+            android:textColor="#656565"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
     <include layout="@layout/bottom_sheet_add_user"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

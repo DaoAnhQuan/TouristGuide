@@ -52,14 +52,12 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         final Notification notification = listNotifications.get(position);
         tvNotificationTime.setText(notification.time);
         Helper.setHtmlToTextView(tvContent,notification.content);
-
         if (notification.type.equals(Notification.INVITATION_TYPE)){
             Helper.loadAvatar(notification.url,imvAvatar,holder.itemView,activity,R.drawable.ic_baseline_person_white_24);
             btnAccept.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    btnAccept.setEnabled(false);
-                    btnDecline.setEnabled(false);
+                    disableButtons(btnAccept,btnDecline);
                     responseInvitation("accept",notification.id)
                     .addOnCompleteListener(new OnCompleteListener<String>() {
                         @Override
@@ -79,8 +77,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             btnDecline.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    btnAccept.setEnabled(false);
-                    btnDecline.setEnabled(false);
+                    disableButtons(btnAccept,btnDecline);
                     responseInvitation("decline",notification.id);
                 }
             });
@@ -90,14 +87,14 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             btnDecline.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    btnAccept.setEnabled(false);
-                    btnDecline.setEnabled(false);
+                    disableButtons(btnAccept,btnDecline);
                     responseInvitation("decline",notification.id);
                 }
             });
             btnAccept.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    disableButtons(btnAccept,btnDecline);
                     responseInvitation("accept",notification.id)
                             .addOnCompleteListener(new OnCompleteListener<String>() {
                                 @Override
@@ -109,13 +106,22 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 }
             });
         }
-        if (notification.type.equals("join request response")){
+        if (notification.type.equals(Notification.JOIN_REQUEST_RESPONSE_TYPE)){
             btnAccept.setVisibility(View.GONE);
             btnDecline.setVisibility(View.GONE);
             imvAvatar.setVisibility(View.INVISIBLE);
         }
+        if (notification.type.equals(Notification.REMOVE_MEMBER_TYPE)){
+            btnAccept.setVisibility(View.GONE);
+            btnDecline.setVisibility(View.GONE);
+            Helper.loadAvatar(notification.url,imvAvatar,holder.itemView,activity,R.drawable.ic_baseline_person_white_24);
+        }
     }
 
+    private void disableButtons(Button btnAccept, Button btnDecline){
+        btnAccept.setEnabled(false);
+        btnDecline.setEnabled(false);
+    }
     private Task<String> responseInvitation(String action, String notificationID){
         Map<String,String> data = new HashMap<>();
         data.put("action",action);

@@ -27,7 +27,10 @@ public class MainActivity extends AppCompatActivity {
     private int currentID = R.id.navigation_group;
     private FirebaseDatabase mDatabase;
     private FirebaseUser user;
-
+    private final String TAG = "MainActivityTAG";
+    private BadgeDrawable groupBadge;
+    private DatabaseReference numberOfUnreadMessage;
+    private DatabaseReference numberOfNotificationRef;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,13 +40,19 @@ public class MainActivity extends AppCompatActivity {
         notificationBadge = navigation.getOrCreateBadge(R.id.navigation_notification);
         notificationBadge.setBadgeTextColor(Color.parseColor("#FFFFFF"));
         notificationBadge.setBackgroundColor(Color.parseColor("#FF0000"));
+        groupBadge = navigation.getOrCreateBadge(R.id.navigation_group);
+        groupBadge.setBadgeTextColor(Color.parseColor("#FFFFFF"));
+        groupBadge.setBackgroundColor(Color.parseColor("#FF0000"));
         mDatabase = FirebaseDatabase.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference numberOfNotificationRef = mDatabase.getReference("Users/"+user.getUid()+"/number_of_notifications");
+        numberOfNotificationRef = mDatabase.getReference("Users/"+user.getUid()+"/number_of_notifications");
         numberOfNotificationRef.addValueEventListener(numberOfNotificationEventListener);
+        numberOfUnreadMessage = mDatabase.getReference("Users/"+user.getUid()+"/unread_messages");
+        numberOfUnreadMessage.addValueEventListener(unreadMessageEventListener);
         loadFragment(new MapFragment());
         Intent intent = new Intent(this,UpdateLocationService.class);
         startService(intent);
+        startSOSService();
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -62,10 +71,17 @@ public class MainActivity extends AppCompatActivity {
                         return false;
                     }
                 case R.id.navigation_post:
-                    return true;
+                    if (currentID != R.id.navigation_post){
+                        currentID = R.id.navigation_post;
+                        fragment = new PostFragment();
+                        loadFragment(fragment);
+                        return true;
+                    }else{
+                        return false;
+                    }
                 case R.id.navigation_notification:
                     if (currentID != R.id.navigation_notification){
-                        mDatabase.getReference("Users/"+user.getUid()+"/number_of_notifications").setValue(0);
+                        numberOfNotificationRef.setValue(0);
                         currentID = R.id.navigation_notification;
                         fragment = new NotificationFragment();
                         loadFragment(fragment);
@@ -87,6 +103,11 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private void startSOSService(){
+        Intent sosService = new Intent(this,SOSService.class);
+        startService(sosService);
+    }
+
     ValueEventListener numberOfNotificationEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -100,6 +121,28 @@ public class MainActivity extends AppCompatActivity {
                 }else{
                     notificationBadge.setVisible(true);
                     notificationBadge.setNumber(numNot);
+                }
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+
+        }
+    };
+
+    ValueEventListener unreadMessageEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            Long numNotLong = (Long) snapshot.getValue();
+            int numMessage = numNotLong.intValue();
+            if (notificationBadge != null){
+                if (numMessage == 0){
+                    groupBadge.setVisible(false);
+                    groupBadge.clearNumber();
+                }else{
+                    groupBadge.setVisible(true);
+                    groupBadge.setNumber(numMessage);
                 }
             }
         }

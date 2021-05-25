@@ -16,7 +16,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.method.KeyListener;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -44,6 +46,7 @@ import com.google.firebase.storage.UploadTask;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -75,6 +78,8 @@ public class NewGroupActivity extends AppCompatActivity implements BSImagePicker
     private android.app.AlertDialog loadingDialog;
     private FirebaseStorage storage;
     private String TAG = "NewGroupActivityTAG";
+    private boolean addMember;
+    private TextView tvNoUser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +97,7 @@ public class NewGroupActivity extends AppCompatActivity implements BSImagePicker
         btnSubmitGroupInfo = (Button) findViewById(R.id.btn_submit_group_info);
         btnSubmitGroupInfo.setEnabled(false);
         btnSubmitGroupInfo.setOnClickListener(btnSubmitGroupSettingClickListener);
+        tvNoUser = findViewById(R.id.tv_no_user);
         toolbarNewGroup.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -108,15 +114,23 @@ public class NewGroupActivity extends AppCompatActivity implements BSImagePicker
         sheetBehavior.setPeekHeight(0);
         selectedUsers = new LinkedHashMap<>();
         RecyclerView rcvSelectedUsers = (RecyclerView)findViewById(R.id.rcv_selected_user);
-        selectedUsersAdapter = new SelectedUsersAdapter(this);
+        selectedUsersAdapter = new SelectedUsersAdapter(this, tvSelected);
         rcvSelectedUsers.setAdapter(selectedUsersAdapter);
         LinearLayoutManager selectedUserLayoutManager = new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false);
         rcvSelectedUsers.setLayoutManager(selectedUserLayoutManager);
         mFunctions = Helper.initFirebaseFunctions();
         loadingDialog = Helper.createLoadingDialog(this);
         Button btnCreateGroup = (Button) findViewById(R.id.btn_create_group);
-        btnCreateGroup.setOnClickListener(createGroupListener);
         storage = FirebaseStorage.getInstance();
+        addMember = getIntent().getBooleanExtra("add_member",false);
+        if (addMember){
+            groupSetting.setVisibility(View.GONE);
+            tvGroupName.setText(R.string.add_member);
+            btnCreateGroup.setOnClickListener(addMemberOnClickListener);
+        }else{
+            btnCreateGroup.setOnClickListener(createGroupListener);
+        }
+
     }
 
     View.OnClickListener createGroupListener = new View.OnClickListener() {
@@ -156,6 +170,27 @@ public class NewGroupActivity extends AppCompatActivity implements BSImagePicker
                     }
                 });
             }
+        }
+    };
+
+    View.OnClickListener addMemberOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            loadingDialog.show();
+            JSONObject members = new JSONObject(selectedUsers);
+            Map<String,Object> data = new HashMap<>();
+            data.put("members",members);
+            mFunctions.getHttpsCallable("addMember")
+                    .call(data)
+                    .addOnCompleteListener(new OnCompleteListener<HttpsCallableResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<HttpsCallableResult> task) {
+                            if (task.isSuccessful()){
+                                loadingDialog.cancel();
+                                finish();
+                            }
+                        }
+                    });
         }
     };
 
@@ -261,18 +296,31 @@ public class NewGroupActivity extends AppCompatActivity implements BSImagePicker
         @Override
         public void afterTextChanged(Editable editable) {
             String query = editable.toString().trim();
-            tvSelected.setVisibility(View.VISIBLE);
-            try {
-                Helper.searchUsers(query).addOnCompleteListener(new OnCompleteListener<List<User>>() {
-                    @Override
-                    public void onComplete(@NonNull Task<List<User>> task) {
-                        adapter = new ListUserNewGroupAdapter(NewGroupActivity.this,task.getResult(),tvSelected);
-                        listUser.setAdapter(adapter);
-                        listUser.setLayoutManager(new LinearLayoutManager(NewGroupActivity.this));
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (query.length()>3){
+                try {
+                    Helper.searchUsers(query).addOnCompleteListener(new OnCompleteListener<List<User>>() {
+                        @Override
+                        public void onComplete(@NonNull Task<List<User>> task) {
+                            List<User> userList = task.getResult();
+                            if (userList.size()>0){
+                                tvNoUser.setVisibility(View.GONE);
+                                tvSelected.setVisibility(View.VISIBLE);
+                                adapter = new ListUserNewGroupAdapter(NewGroupActivity.this,task.getResult(),tvSelected);
+                                listUser.setAdapter(adapter);
+                                listUser.setLayoutManager(new LinearLayoutManager(NewGroupActivity.this));
+                            }else{
+                                tvNoUser.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }else{
+                adapter = new ListUserNewGroupAdapter(NewGroupActivity.this,new ArrayList<User>(),tvSelected);
+                listUser.setAdapter(adapter);
+                listUser.setLayoutManager(new LinearLayoutManager(NewGroupActivity.this));
+                tvNoUser.setVisibility(View.VISIBLE);
             }
         }
     };

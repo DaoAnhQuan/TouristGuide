@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,8 +19,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdapter.ViewHolder>{
     @NonNull
     private Activity activity;
+    private TextView tvSelected;
 
-    public SelectedUsersAdapter(Activity activity){
+    public SelectedUsersAdapter(Activity activity, TextView tvSelected){
+        this.tvSelected = tvSelected;
         this.activity=activity;
     }
     @Override
@@ -54,6 +57,8 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
                     NewGroupActivity.sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 }
                 NewGroupActivity.adapter.notifyDataSetChanged();
+                String result = activity.getString(R.string.selected).toString()+" "+String.valueOf(NewGroupActivity.selectedUsers.size());
+                tvSelected.setText(result);
             }
         });
     }

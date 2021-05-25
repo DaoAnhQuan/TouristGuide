@@ -2,7 +2,7 @@ package com.android.touristguide;
 
 import java.io.Serializable;
 
-public class User{
+public class User implements Serializable{
     public String uid, username,avatar,state,phone,email,avatarTime;
     public Boolean avatarDownload;
 
