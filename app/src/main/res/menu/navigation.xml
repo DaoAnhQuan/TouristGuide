@@ -3,17 +3,21 @@
     <item
         android:id="@+id/navigation_group"
         android:icon="@drawable/ic_baseline_group_24"
+        android:orderInCategory="0"
         android:title="@string/group"/>
     <item
         android:id="@+id/navigation_post"
         android:icon="@drawable/ic_baseline_menu_book_24"
+        android:orderInCategory="1"
         android:title="@string/post"/>
     <item
         android:id="@+id/navigation_notification"
         android:icon="@drawable/ic_baseline_notifications_24"
+        android:orderInCategory="2"
         android:title="@string/notification"/>
     <item
         android:id="@+id/navigation_account"
         android:icon="@drawable/ic_baseline_person_gray_24"
+        android:orderInCategory="3"
         android:title="@string/account"/>
 </menu>

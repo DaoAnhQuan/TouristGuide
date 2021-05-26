@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -31,77 +32,46 @@ public class MainActivity extends AppCompatActivity {
     private BadgeDrawable groupBadge;
     private DatabaseReference numberOfUnreadMessage;
     private DatabaseReference numberOfNotificationRef;
+    private ViewPager2 viewPager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                viewPager.setCurrentItem(item.getOrder());
+                return true;
+            }
+        });
         notificationBadge = navigation.getOrCreateBadge(R.id.navigation_notification);
         notificationBadge.setBadgeTextColor(Color.parseColor("#FFFFFF"));
         notificationBadge.setBackgroundColor(Color.parseColor("#FF0000"));
         groupBadge = navigation.getOrCreateBadge(R.id.navigation_group);
         groupBadge.setBadgeTextColor(Color.parseColor("#FFFFFF"));
         groupBadge.setBackgroundColor(Color.parseColor("#FF0000"));
+        viewPager = findViewById(R.id.view_pager);
+        viewPager.setAdapter(new MainAdapter(this));
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                viewPager.setUserInputEnabled(position != 0);
+                navigation.getMenu().getItem(position).setChecked(true);
+            }
+        });
         mDatabase = FirebaseDatabase.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
         numberOfNotificationRef = mDatabase.getReference("Users/"+user.getUid()+"/number_of_notifications");
         numberOfNotificationRef.addValueEventListener(numberOfNotificationEventListener);
         numberOfUnreadMessage = mDatabase.getReference("Users/"+user.getUid()+"/unread_messages");
         numberOfUnreadMessage.addValueEventListener(unreadMessageEventListener);
-        loadFragment(new MapFragment());
         Intent intent = new Intent(this,UpdateLocationService.class);
         startService(intent);
         startSOSService();
     }
-
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            Fragment fragment;
-            switch (item.getItemId()) {
-                case R.id.navigation_group:
-                    if (currentID != R.id.navigation_group){
-                        currentID = R.id.navigation_group;
-                        fragment = new MapFragment();
-                        loadFragment(fragment);
-                        return true;
-                    }else{
-                        return false;
-                    }
-                case R.id.navigation_post:
-                    if (currentID != R.id.navigation_post){
-                        currentID = R.id.navigation_post;
-                        fragment = new PostFragment();
-                        loadFragment(fragment);
-                        return true;
-                    }else{
-                        return false;
-                    }
-                case R.id.navigation_notification:
-                    if (currentID != R.id.navigation_notification){
-                        numberOfNotificationRef.setValue(0);
-                        currentID = R.id.navigation_notification;
-                        fragment = new NotificationFragment();
-                        loadFragment(fragment);
-                        return true;
-                    }else{
-                        return false;
-                    }
-                case R.id.navigation_account:
-                    if (currentID != R.id.navigation_account){
-                        currentID = R.id.navigation_account;
-                        fragment = new AccountFragment();
-                        loadFragment(fragment);
-                        return true;
-                    }else{
-                        return false;
-                    }
-            }
-            return false;
-        }
-    };
 
     private void startSOSService(){
         Intent sosService = new Intent(this,SOSService.class);
@@ -152,11 +122,5 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
-
-    private void loadFragment(Fragment fragment) {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_container, fragment);
-        transaction.commit();
-    }
 
 }

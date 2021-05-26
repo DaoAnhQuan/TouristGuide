@@ -6,13 +6,12 @@
     tools:context=".LoginActivity"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:background="#3BC5DD"
-    >
+    android:background="#3BC5DD">
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:overScrollMode="ifContentScrolls"
-        >
+        android:overScrollMode="ifContentScrolls" >
 
         <ImageView
             android:layout_width="180dp"
@@ -22,8 +21,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             android:layout_marginTop="10dp"
             android:src="@drawable/app_logo"
-            android:id="@+id/app_logo"
-            />
+            android:id="@+id/app_logo" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
@@ -40,18 +38,18 @@
             app:hintTextAppearance="@style/TextLabel"
             android:id="@+id/til_email_login"
             app:errorEnabled="true"
-            app:errorTextAppearance="@style/Error"
-            >
+            app:errorTextAppearance="@style/Error" >
+
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:theme="@style/LoginEditext"
                 android:maxLines="1"
-                android:inputType="text"
-                android:id="@+id/ed_email_login"
-                />
+                android:inputType="textEmailAddress"
+                android:id="@+id/ed_email_login" />
 
         </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -67,16 +65,16 @@
             android:id="@+id/til_password_login"
             app:endIconMode="password_toggle"
             app:errorEnabled="true"
-            app:errorTextAppearance="@style/Error"
-            >
+            app:errorTextAppearance="@style/Error" >
+
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:theme="@style/LoginEditext"
                 android:maxLines="1"
                 android:inputType="textPassword"
-                android:id="@+id/ed_password_login"
-                />
+                android:id="@+id/ed_password_login" />
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
@@ -136,6 +134,7 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_or"
             android:layout_marginTop="5dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -143,8 +142,8 @@
             android:gravity="center"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="20dp"
-            android:id="@+id/lnl_signup"
-            >
+            android:id="@+id/lnl_signup">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -152,8 +151,8 @@
                 android:text="@string/have_not_account"
                 android:textSize="16sp"
                 android:id="@+id/tv_dont_have_account"
-                android:textColor="#000000"
-                />
+                android:textColor="#000000" />
+
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -162,11 +161,9 @@
                 android:textSize="16sp"
                 android:textColor="#F44336"
                 android:id="@+id/btn_to_sign_up"/>
+
         </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/lnl_signup"
-            android:minHeight="20dp"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </ScrollView>

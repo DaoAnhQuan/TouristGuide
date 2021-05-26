@@ -4,21 +4,24 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:layout_marginTop="4dp"
     android:background="#FFFFFF">
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tv_sender"
         android:textSize="12sp"
         android:textColor="#737272"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginStart="50dp"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="4dp"
         android:weightSum="10">
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -51,10 +54,8 @@
                 android:textSize="16sp"
                 android:textColor="#000000"
                 android:gravity="center_vertical"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp"
                 android:text="@string/loading_image"
                 android:layout_gravity="bottom"/>
         </LinearLayout>

@@ -4,35 +4,38 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="30dp"
     android:background="#FFFFFF">
+
     <TextView
         android:id="@+id/tv_introduction"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
         android:textSize="20sp"
         android:textColor="#000000"
+        android:gravity="center_vertical"
         android:text="@string/change_leader_introduction"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginTop="10dp"/>
+        android:paddingHorizontal="16dp" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcv_members"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@+id/tv_introduction"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="20dp"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:paddingTop="16dp"
+        android:clipToPadding="false" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tv_no_active_members"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:textColor="#636363"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
         app:layout_constraintTop_toBottomOf="@+id/tv_introduction"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
