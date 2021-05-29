@@ -81,16 +81,18 @@ public class MainActivity extends AppCompatActivity {
     ValueEventListener numberOfNotificationEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
-            Long numNotLong = (Long) snapshot.getValue();
-            int numNot = numNotLong.intValue();
-            Log.d("MainActivityTAG",String.valueOf(numNot));
-            if (notificationBadge != null){
-                if (numNot == 0){
-                    notificationBadge.setVisible(false);
-                    notificationBadge.clearNumber();
-                }else{
-                    notificationBadge.setVisible(true);
-                    notificationBadge.setNumber(numNot);
+            if (snapshot.exists()){
+                Long numNotLong = (Long) snapshot.getValue();
+                int numNot = numNotLong.intValue();
+                Log.d("MainActivityTAG",String.valueOf(numNot));
+                if (notificationBadge != null){
+                    if (numNot == 0){
+                        notificationBadge.setVisible(false);
+                        notificationBadge.clearNumber();
+                    }else{
+                        notificationBadge.setVisible(true);
+                        notificationBadge.setNumber(numNot);
+                    }
                 }
             }
         }
@@ -104,15 +106,17 @@ public class MainActivity extends AppCompatActivity {
     ValueEventListener unreadMessageEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
-            Long numNotLong = (Long) snapshot.getValue();
-            int numMessage = numNotLong.intValue();
-            if (notificationBadge != null){
-                if (numMessage == 0){
-                    groupBadge.setVisible(false);
-                    groupBadge.clearNumber();
-                }else{
-                    groupBadge.setVisible(true);
-                    groupBadge.setNumber(numMessage);
+            if (snapshot.exists()){
+                Long numNotLong = (Long) snapshot.getValue();
+                int numMessage = numNotLong.intValue();
+                if (notificationBadge != null){
+                    if (numMessage == 0){
+                        groupBadge.setVisible(false);
+                        groupBadge.clearNumber();
+                    }else{
+                        groupBadge.setVisible(true);
+                        groupBadge.setNumber(numMessage);
+                    }
                 }
             }
         }

@@ -45,6 +45,9 @@
         <activity android:name=".ChatActivity"/>
         <activity android:name=".NewPostActivity"/>
         <activity android:name=".AddLocationActivity"/>
+        <activity android:name=".PostDetailActivity"/>
+        <activity android:name=".PostLocationDetailActivity"/>
+        <activity android:name=".PostCommentActivity"/>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.android.touristguide.fileprovider"
