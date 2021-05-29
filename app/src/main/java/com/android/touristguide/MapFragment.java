@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.ethanhua.skeleton.Skeleton;
 import com.ethanhua.skeleton.SkeletonScreen;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -109,9 +110,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public static final int CHAT_REQUEST_CODE = 0;
     private Button btnStopSOS;
     private Map<String,Boolean> memberSOS;
-
+    private LatLng postLocation;
+    private Marker postLocationMarker;
     public MapFragment(){
 
+    }
+
+    public MapFragment(double latitude,double longitude){
+        postLocation = new LatLng(latitude,longitude);
     }
 
     @Override
@@ -151,7 +157,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 if (locationFromChatMarker == null){
                     MarkerOptions markerOptions = new MarkerOptions()
                             .position(position)
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                            .zIndex(10);
                     locationFromChatMarker = mMap.addMarker(markerOptions);
                 }else{
                     locationFromChatMarker.setPosition(position);
@@ -513,25 +520,29 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     };
 
     private void setMapMenu(String type, String locationSharing){
-        if (type.equals(Helper.INDIVIDUAL_GROUP)){
+        if (postLocation != null){
             toolbar.getMenu().clear();
-            toolbar.inflateMenu(R.menu.non_group_menu);
-        }else {
-            if (type.equals(Helper.LEADER_GROUP)){
-                if (locationSharing.equals("off")){
-                    toolbar.getMenu().clear();
-                    toolbar.inflateMenu(R.menu.leader_menu);
+        }else{
+            if (type.equals(Helper.INDIVIDUAL_GROUP)){
+                toolbar.getMenu().clear();
+                toolbar.inflateMenu(R.menu.non_group_menu);
+            }else {
+                if (type.equals(Helper.LEADER_GROUP)){
+                    if (locationSharing.equals("off")){
+                        toolbar.getMenu().clear();
+                        toolbar.inflateMenu(R.menu.leader_menu);
+                    }else{
+                        toolbar.getMenu().clear();
+                        toolbar.inflateMenu(R.menu.leader_off_menu);
+                    }
                 }else{
-                    toolbar.getMenu().clear();
-                    toolbar.inflateMenu(R.menu.leader_off_menu);
-                }
-            }else{
-                if (locationSharing.equals("off")){
-                    toolbar.getMenu().clear();
-                    toolbar.inflateMenu(R.menu.member_menu);
-                }else{
-                    toolbar.getMenu().clear();
-                    toolbar.inflateMenu(R.menu.member_off_menu);
+                    if (locationSharing.equals("off")){
+                        toolbar.getMenu().clear();
+                        toolbar.inflateMenu(R.menu.member_menu);
+                    }else{
+                        toolbar.getMenu().clear();
+                        toolbar.inflateMenu(R.menu.member_off_menu);
+                    }
                 }
             }
         }
@@ -553,6 +564,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 }
             }
         });
+        if(postLocation != null){
+            postLocationMarker = mMap.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
+                    .position(postLocation)
+                    .zIndex(10));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(postLocation,10.0f));
+        }
     }
 
     private ValueEventListener membersEventListener = new ValueEventListener() {
@@ -748,14 +766,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         markerClickDialog.show();
     }
 
-    private void showLocationPickerDialog(){
+    private void showLocationPickerDialog(int mode){
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         View view = layoutInflater.inflate(R.layout.location_picker_menu,null);
         final AlertDialog markerClickDialog = new AlertDialog.Builder(getContext()).create();
         TextView tvOpenMap = view.findViewById(R.id.tv_open_map);
         TextView tvShareLocation = view.findViewById(R.id.tv_share_location);
         TextView tvRemove = view.findViewById(R.id.tv_remove);
-        final LatLng position = searchMarker.getPosition();
+        LatLng tmpPosition;
+        if (mode == 1){
+            tmpPosition = postLocationMarker.getPosition();
+        }else{
+            tmpPosition = searchMarker.getPosition();
+        }
+        final LatLng position = tmpPosition;
         tvOpenMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -763,25 +787,33 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 startMapIntent(position);
             }
         });
-        tvRemove.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                markerClickDialog.cancel();
-                searchMarker.setVisible(false);
-            }
-        });
-        tvShareLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                markerClickDialog.cancel();
-                showLocationSharingConfirmation();
-            }
-        });
+        if (mode == 0){
+            tvRemove.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerClickDialog.cancel();
+                    searchMarker.setVisible(false);
+                }
+            });
+        }else{
+            tvRemove.setVisibility(View.GONE);
+        }
+        if (groupType.equals("group")){
+            tvShareLocation.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerClickDialog.cancel();
+                    showLocationSharingConfirmation(mode);
+                }
+            });
+        }else{
+            tvShareLocation.setVisibility(View.GONE);
+        }
         markerClickDialog.setView(view);
         markerClickDialog.show();
     }
 
-    private void showLocationSharingConfirmation(){
+    private void showLocationSharingConfirmation(int mode){
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         View view = layoutInflater.inflate(R.layout.location_share_addition,null);
         final AlertDialog locationSharingDialog = new AlertDialog.Builder(getContext()).create();
@@ -797,8 +829,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         btnShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LatLng position = searchMarker.getPosition();
-                searchMarker.setVisible(false);
+                LatLng position;
+                if (mode == 0){
+                    position = searchMarker.getPosition();
+                    searchMarker.setVisible(false);
+                }else{
+                    position = postLocationMarker.getPosition();
+                }
                 Map<String,Object> data = new HashMap<>();
                 data.put("groupID",groupID);
                 data.put("message", edText.getText().toString().trim());
@@ -838,7 +875,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }else{
             String markerId = marker.getId();
             if (searchMarker != null && markerId.equals(searchMarker.getId())){
-                showLocationPickerDialog();
+                showLocationPickerDialog(0);
                 return false;
             }
             if (lastLocationMarker != null && lastLocationMarker.getId().equals(markerId)){
@@ -849,6 +886,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             if (locationFromChatMarker != null && locationFromChatMarker.getId().equals(markerId)){
                 showLocationDetailDialog(locationFromChat.fromName,locationFromChat.fromUrl,
                         locationFromChat.time,locationFromChat.content,locationFromChatMarker.getPosition());
+                return false;
+            }
+            if (postLocationMarker != null && postLocationMarker.getId().equals(markerId)){
+                showLocationPickerDialog(1);
                 return false;
             }
         }

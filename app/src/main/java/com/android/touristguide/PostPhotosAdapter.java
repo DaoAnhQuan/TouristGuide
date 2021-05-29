@@ -19,12 +19,14 @@ import java.util.List;
 
 public class PostPhotosAdapter extends RecyclerView.Adapter<PostPhotosAdapter.ViewHolder>{
     private List<Uri> listPhotoUri;
+    private List<Boolean> isFirebasePhoto;
     private AppCompatActivity activity;
     private final int ADD_PHOTO_VIEW_TYPE = 0;
     private final int PHOTO_VIEW_TYPE = 1;
-    public  PostPhotosAdapter(AppCompatActivity activity, List<Uri> listPhotoUri){
+    public  PostPhotosAdapter(AppCompatActivity activity, List<Uri> listPhotoUri, List<Boolean> isFirebasePhoto){
         this.listPhotoUri = listPhotoUri;
         this.activity = activity;
+        this.isFirebasePhoto = isFirebasePhoto;
     }
     @NonNull
     @Override
@@ -48,6 +50,7 @@ public class PostPhotosAdapter extends RecyclerView.Adapter<PostPhotosAdapter.Vi
                 @Override
                 public void onClick(View view) {
                     listPhotoUri.remove(position);
+                    isFirebasePhoto.remove(position);
                     notifyDataSetChanged();
                 }
             });
