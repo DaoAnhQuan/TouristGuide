@@ -54,11 +54,11 @@ public class MainActivity extends AppCompatActivity {
         groupBadge.setBackgroundColor(Color.parseColor("#FF0000"));
         viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(new MainAdapter(this));
+        viewPager.setUserInputEnabled(false);
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                viewPager.setUserInputEnabled(position != 0);
                 navigation.getMenu().getItem(position).setChecked(true);
             }
         });
