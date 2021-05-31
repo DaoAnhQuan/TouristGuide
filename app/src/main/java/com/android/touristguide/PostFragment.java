@@ -1,11 +1,8 @@
 package com.android.touristguide;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -14,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -22,7 +18,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,14 +25,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.ethanhua.skeleton.Skeleton;
 import com.ethanhua.skeleton.SkeletonScreen;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.functions.FirebaseFunctions;
@@ -235,11 +224,14 @@ public class PostFragment extends Fragment {
             button.setText(topicString[position]);
             button.setIcon(topicIcon[position]);
             button.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            button.setTextColor(Color.parseColor("#000000"));
             if (selectedPosition == -1 && position == 0){
-                button.setBackgroundColor(Color.parseColor("#1964E6"));
+                button.setBackgroundColor(Color.parseColor("#9C27B0"));
+                button.setTextColor(Color.parseColor("#FFFFFF"));
             }
             if (selectedPosition == position){
-                button.setBackgroundColor(Color.parseColor("#1964E6"));
+                button.setBackgroundColor(Color.parseColor("#9C27B0"));
+                button.setTextColor(Color.parseColor("#FFFFFF"));
             }
             button.setOnClickListener(new View.OnClickListener() {
                 @Override

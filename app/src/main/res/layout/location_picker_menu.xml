@@ -10,34 +10,33 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="#FFFFFF"
-        android:paddingStart="?listPreferredItemPaddingLeft"
-        android:paddingEnd="?listPreferredItemPaddingLeft">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp">
+
         <TextView
             android:id="@+id/tv_open_map"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            android:textColor="#000000"
+            android:textColor="@color/colorPrimaryText"
             android:text="@string/open_in_another_map"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"/>
+            android:paddingVertical="8dp"/>
+
         <TextView
             android:id="@+id/tv_share_location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            android:textColor="#000000"
+            android:textColor="@color/colorPrimaryText"
             android:text="@string/share_location"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"/>
+            android:paddingVertical="8dp"/>
         <TextView
             android:id="@+id/tv_remove"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            android:textColor="#000000"
+            android:textColor="@color/colorPrimaryText"
             android:text="@string/remove"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"/>
+            android:paddingVertical="8dp"/>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -8,6 +8,7 @@
     android:paddingTop="10dp"
     android:paddingLeft="?dialogPreferredPadding"
     android:paddingRight="?dialogPreferredPadding">
+
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="match_parent"
@@ -18,6 +19,7 @@
         android:textSize="14sp"
         android:textColor="#000000"
         android:text="@string/location_sharing_addition"/>
+
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,6 +29,7 @@
         app:layout_constraintTop_toBottomOf="@id/tv_title"
         app:hintEnabled="false"
         android:id="@+id/til_text">
+
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -35,6 +38,7 @@
             android:id="@+id/ed_text"/>
 
     </com.google.android.material.textfield.TextInputLayout>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -45,6 +49,7 @@
         android:textColor="@color/text_button_color"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:text="@string/share"/>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -52,7 +57,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         android:id="@+id/btn_cancel"
         android:textSize="18sp"
-        android:textColor="#D85A06"
+        android:textColor="@color/colorCancel"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:text="@string/cancel"/>
 

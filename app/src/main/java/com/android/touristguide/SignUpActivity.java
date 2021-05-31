@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -15,14 +14,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.SignInMethodQueryResult;
-import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
 
@@ -33,7 +28,6 @@ public class SignUpActivity extends AppCompatActivity {
     private TextInputLayout tilEmail;
     private TextInputLayout tilPassword;
     private TextInputLayout tilConfirmPassword;
-    private MaterialButton btnSignUp;
     private FirebaseAuth mAuth;
     private EditText edUsername;
     private TextInputLayout tilUsername;
@@ -50,18 +44,12 @@ public class SignUpActivity extends AppCompatActivity {
         tilEmail = (TextInputLayout) findViewById(R.id.til_email);
         tilPassword = (TextInputLayout) findViewById(R.id.til_password);
         tilConfirmPassword = (TextInputLayout) findViewById(R.id.til_confirm_password);
-        btnSignUp = (MaterialButton) findViewById(R.id.btn_signup);
         tilUsername = (TextInputLayout) findViewById(R.id.til_username);
         edUsername = (EditText) findViewById(R.id.ed_username);
         mAuth = FirebaseAuth.getInstance();
         mFunctions = Helper.initFirebaseFunctions();
 
-        btnSignUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                signUp();
-            }
-        });
+        findViewById(R.id.btn_signup).setOnClickListener(view -> signUp());
 
         edUsername.addTextChangedListener(new TextWatcher() {
             @Override

@@ -54,6 +54,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@+id/ed_search_post"
             android:paddingHorizontal="16dp"
+            android:paddingBottom="2dp"
             android:clipToPadding="false"/>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -90,7 +91,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="24dp"
-        app:backgroundTint="#00BCD4"
+        app:backgroundTint="@color/colorAccent"
         android:elevation="4dp"
         app:iconSize="32dp"
         app:strokeWidth="1dp"

@@ -84,7 +84,7 @@
             android:layout_height="56dp"
             android:id="@+id/btn_photo"
             app:icon="@drawable/ic_baseline_image_24"
-            app:iconTint="#1964E6"
+            app:iconTint="@color/colorPrimary"
             style="@style/Widget.App.Button.OutlinedButton.IconOnly"
             android:layout_weight="0"
             android:theme="@style/FormButton"/>
