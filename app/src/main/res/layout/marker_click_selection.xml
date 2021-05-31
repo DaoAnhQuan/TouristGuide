@@ -10,8 +10,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="#FFFFFF"
-        android:paddingStart="?listPreferredItemPaddingLeft"
-        android:paddingEnd="?listPreferredItemPaddingLeft">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp" >
         <TextView
             android:id="@+id/tv_open_map"
             android:layout_width="match_parent"

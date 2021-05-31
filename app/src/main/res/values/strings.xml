@@ -2,11 +2,11 @@
     <string name="app_name">TouristGuide</string>
     <string name="password">Password</string>
     <string name="forgot_password">Forgot your password?</string>
-    <string name="login">Log in</string>
+    <string name="login">Login</string>
     <string name="login_with_google">Sign in with Google</string>
-    <string name="or"><b>OR</b></string>
+    <string name="or">Or</string>
     <string name="have_not_account">Don\'t have an account?</string>
-    <string name="signup"><u><b>SIGN UP</b></u></string>
+    <string name="signup">Sign up</string>
     <string name="username">Username</string>
     <string name="confirm_password">Confirm password</string>
     <string name="invalid_email">Email is invalid!</string>
@@ -144,4 +144,5 @@
     <string name="comment">Comments</string>
     <string name="write_comment">Write comment …</string>
     <string name="no_comment">No comment</string>
+    <string name="email">Email</string>
 </resources>

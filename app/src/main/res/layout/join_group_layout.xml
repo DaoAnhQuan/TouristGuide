@@ -31,6 +31,7 @@
             />
 
     </com.google.android.material.textfield.TextInputLayout>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -38,9 +39,10 @@
         app:layout_constraintRight_toRightOf="parent"
         android:id="@+id/btn_join"
         android:textSize="18sp"
-        android:textColor="@color/text_button_color"
+        android:textColor="@color/colorPrimary"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:text="@string/join"/>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -48,7 +50,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         android:id="@+id/btn_cancel"
         android:textSize="18sp"
-        android:textColor="#D85A06"
+        android:textColor="@color/colorCancel"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:text="@string/cancel"/>
 
